@@ -3,15 +3,15 @@ import {MAT_DIALOG_DATA, MatDialogRef} from '@angular/material/dialog';
 import {ITemplateField} from '../../../../../bridge/shared.model';
 
 @Component({
-  selector:    'app-field-dialog',
-  templateUrl: './field-dialog.component.html',
-  styleUrls:   ['./field-dialog.component.scss']
-})
+             selector:    'app-field-dialog',
+             templateUrl: './field-dialog.component.html',
+             styleUrls:   ['./field-dialog.component.scss']
+           })
 export class FieldDialogComponent implements OnInit {
   field = {
     name: '',
-    id: '',
-  }
+    id:   '',
+  };
 
   constructor(
     public dialogRef: MatDialogRef<FieldDialogComponent>,
@@ -19,7 +19,7 @@ export class FieldDialogComponent implements OnInit {
   ) { }
 
   ngOnInit(): void {
-   }
+  }
 
   async doSomething() {
     const {...copy} = this.data.find(field => field.id === this.field.id);
@@ -27,6 +27,7 @@ export class FieldDialogComponent implements OnInit {
     copy.export = true;
     this.dialogRef.close(copy);
   }
+
   onCloseClick(): void {
     this.dialogRef.close();
   }

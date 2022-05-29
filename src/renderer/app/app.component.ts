@@ -1,13 +1,13 @@
-import { Component } from '@angular/core';
+import {Component} from '@angular/core';
 import {MatIconRegistry} from '@angular/material/icon';
-import { APP_CONFIG } from '../environments/environment';
+import {APP_CONFIG} from '../environments/environment';
 import {ElectronService} from './services/electron.service';
 
 @Component({
-  selector: 'app-root',
-  templateUrl: './app.component.html',
-  styleUrls: ['./app.component.scss']
-})
+             selector:    'app-root',
+             templateUrl: './app.component.html',
+             styleUrls:   ['./app.component.scss']
+           })
 export class AppComponent {
   constructor(
     private electronService: ElectronService,

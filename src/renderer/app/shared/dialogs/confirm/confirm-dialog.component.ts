@@ -2,10 +2,10 @@ import {Component, OnInit} from '@angular/core';
 import {MatDialogRef} from '@angular/material/dialog';
 
 @Component({
-  selector:    'app-confirm-dialog',
-  templateUrl: './confirm-dialog.component.html',
-  styleUrls:   ['./confirm-dialog.component.scss']
-})
+             selector:    'app-confirm-dialog',
+             templateUrl: './confirm-dialog.component.html',
+             styleUrls:   ['./confirm-dialog.component.scss']
+           })
 export class ConfirmDialogComponent implements OnInit {
 
   constructor(
@@ -13,11 +13,12 @@ export class ConfirmDialogComponent implements OnInit {
   ) { }
 
   ngOnInit(): void {
-   }
+  }
 
   confirm() {
     this.dialogRef.close(true);
   }
+
   cancel(): void {
     this.dialogRef.close(false);
   }

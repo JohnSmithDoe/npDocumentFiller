@@ -1,7 +1,7 @@
 import {spawnSync} from 'child_process';
 import {readFileSync, writeFileSync} from 'fs';
 import {decode, encode} from 'iconv-lite';
-import {resolve, join} from 'path';
+import {join, resolve} from 'path';
 import {CFDFError, CFDFStarter, CFDFTagClose, CFDFTagKids, CFDFTagOpen, CFDFTagTarget, CFDFTagValue, CFDFTrailer, IFDFModel, IFDFValue,} from './pdf.types';
 
 const pdftk = process.env.APP_PDFTK_EXE || resolve(join('.', 'pdftk', 'bin', 'pdftk.exe'));
@@ -103,6 +103,7 @@ export class PdfService {
     this.updateFDFValuePaths(allValues);
     return {fdf, allValues};
   }
+
   // update paths of values with the value of a tree walk up
   private updateFDFValuePaths(allValues: any[]) {
     function getPath(value: IFDFModel) {

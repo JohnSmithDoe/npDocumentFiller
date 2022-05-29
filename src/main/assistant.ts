@@ -2,8 +2,8 @@ import {BrowserWindow} from 'electron';
 import * as fs from 'fs';
 import * as path from 'path';
 import {v4 as uuidv4} from 'uuid';
-import {VPIApiController} from './api';
 import {ITemplateDocument, ITemplateField, ITemplateInput, TVPIDatabase} from '../bridge/shared.model';
+import {VPIApiController} from './api';
 import {PdfService} from './pdf/pdf.service';
 import {IFDFValue} from './pdf/pdf.types';
 import {showFilePickerSync} from './utils/electron.utils';
@@ -152,7 +152,7 @@ export class VPIAssistant {
     if (!fs.existsSync(outputFolder)) {
       fs.mkdirSync(outputFolder);
       result.push(`INFO: Ordner wurde erstellt [${foldername}].`);
-    }else{
+    } else {
       result.push('*******************');
       result.push('FEHLER: Ordner existierte bereits.');
       result.push(`[${foldername}]`);
@@ -167,7 +167,7 @@ export class VPIAssistant {
           // check update time here i guess
           const tmpCopy = VPIAssistant.copyToTempFolder(document.filename);
           const {mtimeMs} = fs.statSync(document.filename);
-          if(document.mtime !== mtimeMs){
+          if (document.mtime !== mtimeMs) {
             document.mtime = mtimeMs;
             VPIAssistant.writeDatabase(this.database);
             result.push('*******************');

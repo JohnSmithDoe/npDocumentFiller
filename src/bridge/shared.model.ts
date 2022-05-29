@@ -27,11 +27,11 @@ export interface ITemplateDocument {
 export type TVPIDatabase = { [key: string]: ITemplateDocument };
 
 export enum EVPIChannels {
-  GET    = 'get-templates',
-  ADD    = 'add-template',
-  EXPORT = 'export-templates',
-  REMOVE = 'remove-template',
-  OPEN = 'open-file',
+  GET         = 'get-templates',
+  ADD         = 'add-template',
+  EXPORT      = 'export-templates',
+  REMOVE      = 'remove-template',
+  OPEN        = 'open-file',
   OPEN_OUTPUT = 'open-output',
-  SAVE = 'save-templates'
+  SAVE        = 'save-templates'
 }

@@ -1,8 +1,8 @@
 export const CFDFHeader =
-  String.fromCharCode(226) +
-  String.fromCharCode(227) +
-  String.fromCharCode(207) +
-  String.fromCharCode(211);
+               String.fromCharCode(226) +
+               String.fromCharCode(227) +
+               String.fromCharCode(207) +
+               String.fromCharCode(211);
 
 // \n on windows only...
 export const CFDFStarter = '%FDF-1.2\n%' + CFDFHeader + '\n1 0 obj \n<<\n/FDF \n<<\n/Fields [\n';
@@ -22,6 +22,7 @@ export interface IFDFValue {
   path: string;
   target: string;
 }
+
 export interface IFDFModel {
   parent: IFDFModel | null;
   kids: IFDFModel[];

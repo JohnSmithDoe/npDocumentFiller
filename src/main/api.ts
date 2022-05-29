@@ -1,6 +1,6 @@
 import {ipcMain, IpcMainEvent} from 'electron';
-import {VPIAssistant} from './assistant';
 import {EVPIChannels, ITemplateDocument, ITemplateInput} from '../bridge/shared.model';
+import {VPIAssistant} from './assistant';
 
 type TApiDescription = {
   [key in EVPIChannels]: (event: IpcMainEvent, ...args: any[]) => void
@@ -9,13 +9,13 @@ type TApiDescription = {
 export class VPIApiController {
 
   private api: TApiDescription = {
-    [EVPIChannels.GET]:    (event: IpcMainEvent, arg) => this.getFileTemplates(event, arg),
-    [EVPIChannels.ADD]:    (event: IpcMainEvent, arg) => this.addFileTemplate(event, arg),
-    [EVPIChannels.EXPORT]: (event: IpcMainEvent, exportFolder: string, exportFields: ITemplateInput[]) => this.exportTemplates(event, exportFolder, exportFields),
-    [EVPIChannels.REMOVE]: (event: IpcMainEvent, filename: string) => this.removeFileTemplate(event, filename),
-    [EVPIChannels.OPEN]: (event: IpcMainEvent, filename:string) => this.openFileWithExplorer(event, filename),
-    [EVPIChannels.OPEN_OUTPUT]: (event: IpcMainEvent, folder:string) => this.openOutputWithExplorer(event, folder),
-    [EVPIChannels.SAVE]: (event: IpcMainEvent, template: ITemplateDocument) => this.saveTemplates(event, template),
+    [EVPIChannels.GET]:         (event: IpcMainEvent, arg) => this.getFileTemplates(event, arg),
+    [EVPIChannels.ADD]:         (event: IpcMainEvent, arg) => this.addFileTemplate(event, arg),
+    [EVPIChannels.EXPORT]:      (event: IpcMainEvent, exportFolder: string, exportFields: ITemplateInput[]) => this.exportTemplates(event, exportFolder, exportFields),
+    [EVPIChannels.REMOVE]:      (event: IpcMainEvent, filename: string) => this.removeFileTemplate(event, filename),
+    [EVPIChannels.OPEN]:        (event: IpcMainEvent, filename: string) => this.openFileWithExplorer(event, filename),
+    [EVPIChannels.OPEN_OUTPUT]: (event: IpcMainEvent, folder: string) => this.openOutputWithExplorer(event, folder),
+    [EVPIChannels.SAVE]:        (event: IpcMainEvent, template: ITemplateDocument) => this.saveTemplates(event, template),
   };
 
   constructor(private readonly vpiAssistant: VPIAssistant) {

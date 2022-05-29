@@ -11,17 +11,17 @@ import {HomeModule} from './home/home.module';
 import {ElectronService} from './services/electron.service';
 
 @NgModule({
-  declarations: [AppComponent],
-  imports: [
-    BrowserModule,
-    BrowserAnimationsModule,
-    HomeModule,
-    AppRoutingModule,
-  ],
-  providers: [
-    {provide: MAT_FORM_FIELD_DEFAULT_OPTIONS, useValue: {appearance: 'outline', floatLabel: 'always'}},
-    ElectronService
-  ],
-  bootstrap: [AppComponent]
-})
+            declarations: [AppComponent],
+            imports:      [
+              BrowserModule,
+              BrowserAnimationsModule,
+              HomeModule,
+              AppRoutingModule,
+            ],
+            providers:    [
+              {provide: MAT_FORM_FIELD_DEFAULT_OPTIONS, useValue: {appearance: 'outline', floatLabel: 'always'}},
+              ElectronService
+            ],
+            bootstrap:    [AppComponent]
+          })
 export class AppModule {}

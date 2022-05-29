@@ -1,14 +1,14 @@
 import {NestedTreeControl} from '@angular/cdk/tree';
 import {Component, EventEmitter, Input, OnDestroy, OnInit, Output} from '@angular/core';
-import {ElectronService} from '../../../../services/electron.service';
 import {ITemplateDocument} from '../../../../../../bridge/shared.model';
+import {ElectronService} from '../../../../services/electron.service';
 
 @Component({
-  selector:    'app-document-node',
-  templateUrl: './document-node.component.html',
-  styleUrls:   ['./document-node.component.scss'],
-})
-export class DocumentNodeComponent  implements OnInit, OnDestroy  {
+             selector:    'app-document-node',
+             templateUrl: './document-node.component.html',
+             styleUrls:   ['./document-node.component.scss'],
+           })
+export class DocumentNodeComponent implements OnInit, OnDestroy {
 
   @Input() node: ITemplateDocument;
   @Input() treeControl: NestedTreeControl<ITemplateDocument>;
@@ -22,7 +22,7 @@ export class DocumentNodeComponent  implements OnInit, OnDestroy  {
   ) { }
 
   ngOnInit(): void {
-   }
+  }
 
   ngOnDestroy(): void {
   }

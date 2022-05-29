@@ -25,7 +25,7 @@ import {ConfirmDialogComponent} from './dialogs/confirm/confirm-dialog.component
               DocumentNodeComponent,
               FieldNodeComponent
             ],
-            imports: [
+            imports:      [
               CommonModule,
               FormsModule,
               MatDialogModule,

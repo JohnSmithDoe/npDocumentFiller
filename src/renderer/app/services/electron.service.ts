@@ -1,29 +1,23 @@
 import {Injectable} from '@angular/core';
-import * as childProcess from 'child_process';
-
-// If you import a module but never use any of the imported values other than as TypeScript types,
-// the resulting javascript file will look as if you never imported the module at all.
-import {ipcRenderer, webFrame} from 'electron';
-import * as fs from 'fs';
-import {EVPIChannels, ITemplateDocument, ITemplateField, ITemplateInput} from '../../../bridge/shared.model';
+import {ipcRenderer} from 'electron';
+import {EVPIChannels, ITemplateDocument, ITemplateInput} from '../../../bridge/shared.model';
 
 @Injectable({
               providedIn: 'root'
             })
 export class ElectronService {
-  private webFrame: typeof webFrame;
-  private childProcess: typeof childProcess;
-  private fs: typeof fs;
-  private ipcRenderer: typeof ipcRenderer;
+  // private readonly webFrame: typeof webFrame;
+  // private readonly childProcess: typeof childProcess;
+  // private readonly fs: typeof fs;
+  private readonly ipcRenderer: typeof ipcRenderer;
 
   constructor() {
     // Conditional imports
     if (this.isElectron) {
       this.ipcRenderer = window.require('electron').ipcRenderer;
-      this.webFrame = window.require('electron').webFrame;
-
-      this.childProcess = window.require('child_process');
-      this.fs = window.require('fs');
+      // this.webFrame = window.require('electron').webFrame;
+      // this.childProcess = window.require('child_process');
+      // this.fs = window.require('fs');
 
       // Notes :
       // * A NodeJS's dependency imported with 'window.require' MUST BE present in `dependencies` of both `app/package.json`
@@ -45,12 +39,12 @@ export class ElectronService {
 
   private get renderer() { return this.isElectron ? this.ipcRenderer : undefined;}
 
-  private sendSync(channel: EVPIChannels, ...data: any){
+  private sendSync(channel: EVPIChannels, ...data: any) {
     console.log('Send on channel: ', channel);
     return this.renderer?.sendSync(channel, ...data);
   }
 
-  getTemplates():  ITemplateDocument[] {
+  getTemplates(): ITemplateDocument[] {
     return this.sendSync(EVPIChannels.GET);
   }
 

@@ -1,5 +1,5 @@
 {
-  "extends": "../../tsconfig.renderer.json",
+  "extends":         "../../tsconfig.renderer.json",
   "compilerOptions": {
     "baseUrl": "",
     "types":   [

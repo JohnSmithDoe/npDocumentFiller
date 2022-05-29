@@ -12,19 +12,19 @@ html, body {
   font-family: Roboto, Arial, Helvetica, sans-serif;
 }
 
-mat-checkbox.wrap-label{
-  .mat-checkbox-layout{
+mat-checkbox.wrap-label {
+  .mat-checkbox-layout {
     white-space: normal !important;
   }
 }
 
-app-field-node{
+app-field-node {
   .mat-form-field-wrapper {
     padding-bottom: 0;
   }
 }
 
-$color-green:  mat.get-color-from-palette(mat.$green-palette, 600);
+$color-green: mat.get-color-from-palette(mat.$green-palette, 600);
 
 .btn-success {
   background-color: $color-green;

@@ -1,4 +1,6 @@
-import {app, BrowserWindow, ipcMain, screen} from 'electron';
+// noinspection JSIgnoredPromiseFromCall
+
+import {app, BrowserWindow} from 'electron';
 import * as fs from 'fs';
 import * as path from 'path';
 import * as url from 'url';
@@ -42,10 +44,10 @@ function createWindow(): VPIAssistant {
     }
 
     let indexUrl = url.format({
-                            pathname: path.join(__dirname, pathIndex),
-                            protocol: 'file:',
-                            slashes:  true,
-                          });
+                                pathname: path.join(__dirname, pathIndex),
+                                protocol: 'file:',
+                                slashes:  true,
+                              });
 
     win.loadURL(indexUrl);
 

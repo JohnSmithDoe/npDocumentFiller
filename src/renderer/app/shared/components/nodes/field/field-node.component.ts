@@ -3,10 +3,10 @@ import {Component, EventEmitter, Input, OnInit, Output} from '@angular/core';
 import {ITemplateDocument, ITemplateField} from '../../../../../../bridge/shared.model';
 
 @Component({
-  selector:    'app-field-node',
-  templateUrl: './field-node.component.html',
-  styleUrls:   ['./field-node.component.scss']
-})
+             selector:    'app-field-node',
+             templateUrl: './field-node.component.html',
+             styleUrls:   ['./field-node.component.scss']
+           })
 export class FieldNodeComponent implements OnInit {
 
   @Input() node: ITemplateField;
@@ -16,8 +16,7 @@ export class FieldNodeComponent implements OnInit {
 
   private changedName = false;
 
-  constructor(
-  ) { }
+  constructor() { }
 
   ngOnInit(): void {
   }

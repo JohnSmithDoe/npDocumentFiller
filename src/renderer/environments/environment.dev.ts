@@ -1,4 +1,4 @@
 export const APP_CONFIG = {
-  production: false,
+  production:  false,
   environment: 'DEV'
 };

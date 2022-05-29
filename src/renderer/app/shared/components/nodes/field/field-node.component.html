@@ -7,6 +7,6 @@
   <button (click)="removed.emit(node)" color="warn" mat-icon-button matTooltip="Dokument entfernen" aria-label="Remove the selected document">
     <mat-icon class="mat-icon-rtl-mirror">delete</mat-icon>
   </button>
-  <mat-checkbox color="primary"  [(ngModel)]="node.export" (ngModelChange)="changed.emit(node)">Exportieren &nbsp;</mat-checkbox>
+  <mat-checkbox color="primary" [(ngModel)]="node.export" (ngModelChange)="changed.emit(node)">Exportieren &nbsp;</mat-checkbox>
 
 </div>

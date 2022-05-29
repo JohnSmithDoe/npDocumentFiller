@@ -1,4 +1,5 @@
 import * as child_process from 'child_process';
+
 /**
  * cmd.exe's internal start command by default interprets a "..."-enclosed 1st argument as the window
  * title for the new console window to create (which doesn't apply here).
