@@ -1,0 +1,22 @@
+<h2 mat-dialog-title>Feld hinzufügen</h2>
+<mat-dialog-content class="mat-typography">
+  <mat-form-field>
+    <mat-label>Feld</mat-label>
+    <mat-select [(ngModel)]="field.id">
+      <mat-option *ngFor="let field of data" [value]="field.id">
+        {{field.name}}
+      </mat-option>
+    </mat-select>
+  </mat-form-field>
+  <mat-form-field>
+    <mat-label>Bezeichnung</mat-label>
+    <input matInput [(ngModel)]="field.name" type="text" placeholder="Eigene Feldbezeichnung">
+    <mat-hint>Felder mit gleichen Bezeichnungen werden Dokumenten weit zusammengelegt</mat-hint>
+  </mat-form-field>
+
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+  <button mat-raised-button (click)="onCloseClick()" color="warn">Abbrechen</button>
+  <button mat-raised-button (click)="doSomething()" class="btn-success">Hinzufügen</button>
+</mat-dialog-actions>

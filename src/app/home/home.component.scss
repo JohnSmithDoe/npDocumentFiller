@@ -1,0 +1,93 @@
+@use 'sass:map';
+@use '@angular/material' as mat;
+
+$color-reddish:    mat.get-color-from-palette(mat.$orange-palette, 300);
+
+:host {
+  display: grid;
+  grid-template-columns: minmax(auto, 38.2%) minmax(61.8%, auto);
+  grid-template-rows: auto 1fr auto;
+  grid-gap: .5rem;
+  grid-template-areas: 'header-left header-right' 'content-left content-right' 'footer footer';
+  padding: .5rem .5rem 0 .5rem;
+  height: calc(100vh - .5rem);
+
+  @media (max-width: 691px) {
+    grid-template-columns: 1fr;
+    grid-template-areas: 'header-left' 'content-left' 'header-right' 'content-right' 'footer';
+    grid-template-rows: auto;
+
+  }
+
+  header {
+    &.left {
+      grid-area: header-left;
+    }
+    &.right {
+      grid-area: header-right;
+    }
+  }
+
+  main {
+    display: flex;
+    position: relative;
+
+    &.left {
+      grid-area: content-left;
+    }
+
+    &.right {
+      grid-area: content-right;
+    }
+  }
+
+  mat-card-actions{
+    min-height: 40px;
+  }
+  mat-card {
+    flex: 1;
+    mat-form-field {
+      .mat-form-field-wrapper {
+        padding-bottom: 0;
+      }
+
+      margin-top: 1rem;
+      display: block;
+      flex: 1;
+    }
+
+    &.warn-card {
+      background-color: $color-reddish;
+      margin: 2rem 0;
+      mat-card-content {
+        padding: 1rem;
+      }
+    }
+  }
+
+  .mat-list-item {
+    &.list-item{
+      height: auto;
+    }
+  }
+
+  .tree-invisible {
+    display: none;
+  }
+
+  .tree ul,
+  .tree li {
+    margin-top: 0;
+    margin-bottom: 0;
+    list-style-type: none;
+  }
+
+  /*
+   * This padding sets alignment of the nested nodes.
+   */
+  .tree .mat-nested-tree-node div[role=group] {
+    padding-left: 40px;
+  }
+
+
+}

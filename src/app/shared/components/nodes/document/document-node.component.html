@@ -1,0 +1,38 @@
+<div class="mat-tree-node">
+
+  <mat-checkbox class="wrap-label" [(ngModel)]="node.export" (ngModelChange)="changed.emit(node)"
+                matTooltip="Dokument aus-/abwählen" aria-label="Export the selected document"
+                color="primary"
+  >{{node.name}}</mat-checkbox>
+
+
+  <button mat-icon-button matTreeNodeToggle color="primary"
+          [matTooltip]="treeControl.isExpanded(node) ? 'Felder und Optionen verbergen' : 'Felder und Optionen anzeigen'"
+          [attr.aria-label]="'Toggle ' + node.name">
+    <mat-icon class="mat-icon-rtl-mirror">
+      {{treeControl.isExpanded(node) ? 'expand_more' : 'more_horiz'}}
+    </mat-icon>
+  </button>
+
+  <ng-container *ngIf="treeControl.isExpanded(node)">
+
+    <button *ngIf="node.type !== 'resource'" (click)="addfield.emit(node)" color="primary"  mat-icon-button matTooltip="Feld hinzufügen" aria-label="Open the field mapping dialog">
+      <mat-icon class="mat-icon-rtl-mirror">add</mat-icon>
+    </button>
+
+    <button *ngIf="!!node.previewfile?.length" (click)="showFieldMappingDocument(node)" color="primary" mat-icon-button matTooltip="Feldnamen im Dokument anzeigen" aria-label="Open the field mapping pdf">
+      <mat-icon class="mat-icon-rtl-mirror">description</mat-icon>
+    </button>
+
+    <button (click)="showDocument(node)" color="primary"  mat-icon-button matTooltip="Orginal Dokument öffnen" aria-label="Open the original document">
+      <mat-icon class="mat-icon-rtl-mirror">open_in_new</mat-icon>
+    </button>
+
+    <button (click)="removed.emit(node)" color="warn" mat-icon-button matTooltip="Dokument entfernen" aria-label="Remove the selected document">
+      <mat-icon class="mat-icon-rtl-mirror">delete</mat-icon>
+    </button>
+
+  </ng-container>
+
+
+</div>

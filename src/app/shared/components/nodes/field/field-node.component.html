@@ -1,0 +1,12 @@
+<div class="mat-tree-node">
+  <mat-form-field>
+    <mat-label>{{node.value}}</mat-label>
+    <input matInput [(ngModel)]="node.name" type="text" placeholder="{{node.value}}" (ngModelChange)="changingName()" (blur)="blurNameInput(node)">
+
+  </mat-form-field>
+  <button (click)="removed.emit(node)" color="warn" mat-icon-button matTooltip="Dokument entfernen" aria-label="Remove the selected document">
+    <mat-icon class="mat-icon-rtl-mirror">delete</mat-icon>
+  </button>
+  <mat-checkbox color="primary"  [(ngModel)]="node.export" (ngModelChange)="changed.emit(node)">Exportieren &nbsp;</mat-checkbox>
+
+</div>

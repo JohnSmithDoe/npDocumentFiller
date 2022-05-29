@@ -1,0 +1,113 @@
+<main class="left">
+  <mat-card>
+    <h3>Vorlagen verwalten</h3>
+    <mat-card-actions align="start">
+      <button mat-flat-button class="btn-success" (click)="addFileTemplate()">
+        <mat-icon>add</mat-icon>
+        Vorlage hinzufügen
+      </button>
+    </mat-card-actions>
+    <mat-divider></mat-divider>
+    <mat-list *ngIf="dataSource.data?.length">
+      <h4>Vorlagen</h4>
+      <mat-tree [dataSource]="dataSource" [treeControl]="treeControl" class="tree" #documenttree [trackBy]="trackBy">
+        <!-- This is the tree node template for expandable nodes -->
+        <mat-nested-tree-node *matTreeNodeDef="let node; when: hasChild">
+          <app-document-node [node]="node" [treeControl]="treeControl"
+                             (changed)="changedDocument($event)"
+                             (removed)="showConfirmDialog($event, null)"
+                             (addfield)="showFieldMappingDialog($event)"
+          ></app-document-node>
+          <div [class.tree-invisible]="!treeControl.isExpanded(node)" role="group">
+            <ng-container matTreeNodeOutlet></ng-container>
+          </div>
+        </mat-nested-tree-node>
+
+        <!-- This is the tree node template for leaf nodes -->
+        <mat-tree-node *matTreeNodeDef="let node">
+          <app-document-node *ngIf="!!node.fields" [node]="node" [treeControl]="treeControl"
+                             (changed)="changedDocument($event)"
+                             (removed)="showConfirmDialog($event, null)"
+                             (addfield)="showFieldMappingDialog($event)"
+          ></app-document-node>
+          <app-field-node *ngIf="!node.fields" [node]="node" [treeControl]="treeControl"
+                          (changed)="changedField($event)" (removed)="showConfirmDialog(null, $event)"
+          ></app-field-node>
+        </mat-tree-node>
+
+      </mat-tree>
+    </mat-list>
+    <mat-card *ngIf="!dataSource.data?.length" class="warn-card">
+      <mat-card-header>
+        <mat-card-subtitle>
+          Füge zuerst mindestens eine Dokumentenvorlage hinzu.
+        </mat-card-subtitle>
+        <mat-card-title>
+          Noch keine Dokumente hinzugefügt
+        </mat-card-title>
+      </mat-card-header>
+      <mat-card-content>
+        <p>
+          Wähle dafür die Original Dokumente aus. <br>
+          Es wird ein Link zum Orginal gespeichert und bei jedem export wird die Orginal Vorlage verwendet.
+        </p>
+        <h4>Achtung: Serverzugriff wird benötigt wenn die Dateien auf dem Server liegen</h4>
+      </mat-card-content>
+    </mat-card>
+  </mat-card>
+</main>
+
+<main class="right">
+  <mat-card>
+    <h3>Unterlagen erstellen</h3>
+    <mat-card-actions align="start">
+      <button mat-flat-button (click)="createDocuments()" color="warn" [disabled]="!exportMsgs.length">
+        <mat-icon>save_as</mat-icon>
+        Dokumente erstellen
+      </button>
+      <button mat-icon-button (click)="openOutputFolder()" matTooltip="Ausgabe Ordner öffnen">
+        <mat-icon>open_in_new</mat-icon>
+      </button>
+    </mat-card-actions>
+    <mat-divider></mat-divider>
+    <mat-list *ngIf="!!exportMsgs.length">
+      <h4>Folgende Unterlagen werden erstellt</h4>
+      <mat-list-item class="list-item" *ngFor="let msg of exportMsgs">
+        <li [innerHtml]="msg"></li>
+      </mat-list-item>
+      <h4>Export Einstellungen</h4>
+      <mat-form-field>
+        <mat-label>Export Ordner Suffix</mat-label>
+        <input matInput [(ngModel)]="exportSuffix" type="text" placeholder="Export Ordner Suffix" (ngModelChange)="updateExportFolder()">
+        <mat-hint>Wird an den Export-Ordner Namen angehängt</mat-hint>
+      </mat-form-field>
+      <h4>Werte die in die Unterlagen eingefügt werden</h4>
+      <div *ngFor="let field of exportedFields">
+        <mat-form-field>
+          <mat-label>{{field.name}}</mat-label>
+          <input matInput [(ngModel)]="field.value" type="text" placeholder="{{field.name}}">
+          <mat-hint>Gleiche Feldnamen werden zusammengefasst</mat-hint>
+        </mat-form-field>
+        <small><strong>Verwendet in: </strong>{{field.info}}</small>
+      </div>
+    </mat-list>
+    <mat-card *ngIf="exportMsgs.length && !exportedFields.length && !!dataSource.data?.length" class="warn-card">
+      Es wurden noch keine Felder für den export ausgewählt.
+    </mat-card>
+    <mat-card *ngIf="!exportMsgs.length && !exportedFields.length && !!dataSource.data?.length" class="warn-card">
+      <mat-card-header>
+        <mat-card-subtitle>
+          Wähle zuerst mindestens eine Dokumentenvorlage für den Export aus
+        </mat-card-subtitle>
+        <mat-card-title>
+          Noch keine Dokumente ausgewählt
+        </mat-card-title>
+      </mat-card-header>
+      <mat-card-content>
+        <p>
+          Markiere hierfür mindestens ein Dokument für den export indem Du es auswählst
+        </p>
+      </mat-card-content>
+    </mat-card>
+  </mat-card>
+</main>
