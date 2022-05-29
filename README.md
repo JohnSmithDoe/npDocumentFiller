@@ -1,14 +1,21 @@
 # WIP
 
-* clean up 
 * xlsx
 * sfw version??
+
+# TODOs
+
+````
+pdf.service.ts:
+(156, 6) // TODO: how to get the encoding of a file instead of assuming win1252
+(164, 6) // TODO: can we use utf-8 in some way...?? Windows only for now....
+````
 
 # Introduction
 
 This small app helps to fill multiple documents like pdfs with forms and xlsx files with data.
 You can setup document links to original files and create a filled set of them with some simple actions.
-Depends on pdftk to be available on your system.
+Depends on pdftk to be available on your system and runs currently only on windows because of the win1252 encoding.
 
 Based on: https://github.com/maximegris/angular-electron (electron + angular)
 
