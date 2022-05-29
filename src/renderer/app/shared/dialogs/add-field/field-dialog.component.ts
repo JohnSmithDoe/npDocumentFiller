@@ -1,6 +1,6 @@
 import {Component, Inject, OnInit} from '@angular/core';
 import {MAT_DIALOG_DATA, MatDialogRef} from '@angular/material/dialog';
-import {ITemplateField} from '../../shared.model';
+import {ITemplateField} from '../../../../../bridge/shared.model';
 
 @Component({
   selector:    'app-field-dialog',

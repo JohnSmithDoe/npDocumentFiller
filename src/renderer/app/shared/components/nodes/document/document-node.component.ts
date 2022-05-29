@@ -1,7 +1,7 @@
 import {NestedTreeControl} from '@angular/cdk/tree';
 import {Component, EventEmitter, Input, OnDestroy, OnInit, Output} from '@angular/core';
 import {ElectronService} from '../../../../services/electron.service';
-import {ITemplateDocument} from '../../../shared.model';
+import {ITemplateDocument} from '../../../../../../bridge/shared.model';
 
 @Component({
   selector:    'app-document-node',

@@ -6,6 +6,8 @@ app/**/*.js
 
 # compiled output
 /dist
+/dist/main
+/dist/renderer
 /tmp
 /out-tsc
 /app-builds

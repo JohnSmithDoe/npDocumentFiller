@@ -1,6 +1,6 @@
 import {ipcMain, IpcMainEvent} from 'electron';
 import {VPIAssistant} from './assistant';
-import {EVPIChannels, ITemplateDocument, ITemplateInput} from './utils/model';
+import {EVPIChannels, ITemplateDocument, ITemplateInput} from '../bridge/shared.model';
 
 type TApiDescription = {
   [key in EVPIChannels]: (event: IpcMainEvent, ...args: any[]) => void

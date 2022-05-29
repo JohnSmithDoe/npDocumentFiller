@@ -7,7 +7,7 @@
   "projects": {
     "np-document-filler": {
       "root": "",
-      "sourceRoot": "src",
+      "sourceRoot": "src/renderer",
       "projectType": "application",
       "schematics": {
         "@schematics/angular:application": {
@@ -22,18 +22,18 @@
         "build": {
           "builder": "@angular-builders/custom-webpack:browser",
           "options": {
-            "outputPath": "dist",
-            "index": "src/index.html",
-            "main": "src/main.ts",
-            "tsConfig": "src/tsconfig.app.json",
-            "polyfills": "src/polyfills.ts",
+            "outputPath": "dist/renderer",
+            "index": "src/renderer/index.html",
+            "main": "src/renderer/main.ts",
+            "tsConfig": "src/renderer/tsconfig.app.json",
+            "polyfills": "src/renderer/polyfills.ts",
             "inlineStyleLanguage": "scss",
             "assets": [
-              "src/favicon.ico",
-              "src/assets"
+              "src/renderer/favicon.ico",
+              "src/renderer/assets"
             ],
             "styles": [
-              "src/styles.scss"
+              "src/renderer/styles.scss"
             ],
             "scripts": [],
             "customWebpackConfig": {
@@ -53,8 +53,8 @@
               "buildOptimizer": false,
               "fileReplacements": [
                 {
-                  "replace": "src/environments/environment.ts",
-                  "with": "src/environments/environment.dev.ts"
+                  "replace": "src/renderer/environments/environment.ts",
+                  "with": "src/renderer/environments/environment.dev.ts"
                 }
               ]
             },
@@ -69,8 +69,8 @@
               "buildOptimizer": true,
               "fileReplacements": [
                 {
-                  "replace": "src/environments/environment.ts",
-                  "with": "src/environments/environment.prod.ts"
+                  "replace": "src/renderer/environments/environment.ts",
+                  "with": "src/renderer/environments/environment.prod.ts"
                 }
               ]
             },
@@ -85,8 +85,8 @@
               "buildOptimizer": false,
               "fileReplacements": [
                 {
-                  "replace": "src/environments/environment.ts",
-                  "with": "src/environments/environment.web.ts"
+                  "replace": "src/renderer/environments/environment.ts",
+                  "with": "src/renderer/environments/environment.web.ts"
                 }
               ]
             },
@@ -101,8 +101,8 @@
               "buildOptimizer": true,
               "fileReplacements": [
                 {
-                  "replace": "src/environments/environment.ts",
-                  "with": "src/environments/environment.web.prod.ts"
+                  "replace": "src/renderer/environments/environment.ts",
+                  "with": "src/renderer/environments/environment.web.prod.ts"
                 }
               ]
             }

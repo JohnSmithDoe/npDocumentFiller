@@ -5,7 +5,7 @@ import * as childProcess from 'child_process';
 // the resulting javascript file will look as if you never imported the module at all.
 import {ipcRenderer, webFrame} from 'electron';
 import * as fs from 'fs';
-import {EVPIChannels, ITemplateDocument, ITemplateField, ITemplateInput} from '../shared/shared.model';
+import {EVPIChannels, ITemplateDocument, ITemplateField, ITemplateInput} from '../../../bridge/shared.model';
 
 @Injectable({
               providedIn: 'root'

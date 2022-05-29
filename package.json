@@ -2,18 +2,19 @@
   "name": "np-document-filler",
   "version": "1.0.0",
   "description": "Copy and fill xlsx and pdf documents with the same input data",
-  "main": "app/main.js",
+  "main": "dist/main/main.js",
   "scripts": {
-    "start": "npm-run-all -p electron:serve ng:serve",
-    "ng:serve": "ng serve -c web -o",
-    "electron:serve": "wait-on tcp:4200 && npm run electron:tsc && electron . --serve",
-    "build:all": "npm run electron:tsc && ng build --base-href ./",
-    "build:all:prod": "npm run build:all -- -c production",
-    "electron:local": "npm run build:all:prod && electron .",
+    "start":             "npm-run-all -p electron:serve ng:serve",
+    "ng:serve":          "ng serve -c web -o",
+    "electron:serve":    "wait-on tcp:4200 && npm run electron:tsc && electron . --serve",
+    "build:all":         "npm run electron:tsc && ng build --base-href ./",
+    "build:all:prod":    "npm run build:all -- -c production",
+    "electron:local":    "npm run build:all:prod && electron .",
     "electron:unpacked": "npm run build:all:prod && electron-builder build --publish=never --dir",
+    "electron:build": "electron-builder build --publish=never --dir",
     "electron:packaged": "npm run build:all:prod && electron-builder build --publish=never",
-    "electron:tsc": "tsc -p tsconfig.serve.json",
-    "postinstall": "electron-builder install-app-deps"
+    "electron:tsc":      "tsc -p tsconfig.main.json",
+    "postinstall":       "electron-builder install-app-deps"
   },
   "repository": {
     "type": "git",

@@ -1,6 +1,6 @@
 import {NestedTreeControl} from '@angular/cdk/tree';
 import {Component, EventEmitter, Input, OnInit, Output} from '@angular/core';
-import {ITemplateDocument, ITemplateField} from '../../../shared.model';
+import {ITemplateDocument, ITemplateField} from '../../../../../../bridge/shared.model';
 
 @Component({
   selector:    'app-field-node',

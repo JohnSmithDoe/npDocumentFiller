@@ -1,4 +1,4 @@
-import {ITemplateDocument} from './shared.model';
+import {ITemplateDocument} from '../../../bridge/shared.model';
 
 export function assignDeep(target: ITemplateDocument[], source: ITemplateDocument[]) {
   if (!source) return;

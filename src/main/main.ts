@@ -20,9 +20,9 @@ function createWindow(): VPIAssistant {
                             center:          true,
                             webPreferences:  {
                               nodeIntegration:             true,
-                              allowRunningInsecureContent: (serve),
-                              contextIsolation:            false,  // false if you want to run e2e test with Spectron
-                              devTools:                    true,
+                              allowRunningInsecureContent: serve,
+                              contextIsolation:            false,
+                              devTools:                    serve,
                             },
                           });
 
@@ -34,18 +34,24 @@ function createWindow(): VPIAssistant {
     win.loadURL('http://localhost:4200');
   } else {
     // Path when running electron executable
-    let pathIndex = './index.html';
+    let pathIndex = '../renderer/index.html';
 
-    if (fs.existsSync(path.join(__dirname, '../dist/index.html'))) {
+    if (fs.existsSync(path.join(__dirname, '../dist/renderer/index.html'))) {
       // Path when running electron in local folder
-      pathIndex = '../dist/index.html';
+      pathIndex = '../dist/renderer/index.html';
     }
 
-    win.loadURL(url.format({
-                             pathname: path.join(__dirname, pathIndex),
-                             protocol: 'file:',
-                             slashes:  true
-                           }));
+    let indexUrl = url.format({
+                            pathname: path.join(__dirname, pathIndex),
+                            protocol: 'file:',
+                            slashes:  true,
+                          });
+
+    win.loadURL(indexUrl);
+
+    win.webContents.on('did-fail-load', () => {
+      win.loadURL(indexUrl); // REDIRECT TO FIRST WEBPAGE AGAIN
+    });
   }
 
   // Emitted when the window is closed.

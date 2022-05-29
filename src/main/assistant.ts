@@ -3,7 +3,7 @@ import * as fs from 'fs';
 import * as path from 'path';
 import {v4 as uuidv4} from 'uuid';
 import {VPIApiController} from './api';
-import {ITemplateDocument, ITemplateField, ITemplateInput, TVPIDatabase} from './utils/model';
+import {ITemplateDocument, ITemplateField, ITemplateInput, TVPIDatabase} from '../bridge/shared.model';
 import {PdfService} from './pdf/pdf.service';
 import {IFDFValue} from './pdf/pdf.types';
 import {showFilePickerSync} from './utils/electron.utils';

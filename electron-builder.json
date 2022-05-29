@@ -1,7 +1,8 @@
 {
   "asar": false,
   "directories": {
-    "output": "release/"
+    "output": "release/",
+    "app": "src/main"
   },
   "files": [
     "**/*",
@@ -12,10 +13,27 @@
   ],
   "extraResources": [
     {
-      "from": "dist",
+      "from": "dist/main",
       "to": "app",
       "filter": [
-        "**/*"
+        "**/*",
+        "!*.map"
+      ]
+    },
+    {
+      "from": "dist/bridge",
+      "to": "bridge",
+      "filter": [
+        "**/*",
+        "!*.map"
+      ]
+    },
+    {
+      "from": "dist/renderer",
+      "to": "renderer",
+      "filter": [
+        "**/*",
+        "!*.map"
       ]
     },
     {
@@ -27,19 +45,19 @@
     }
   ],
   "win": {
-    "icon": "dist/assets/icons",
+    "icon": "dist/renderer/assets/icons",
     "target": [ ]
   },
   "portable": {
   },
   "mac": {
-    "icon": "dist/assets/icons",
+    "icon": "dist/renderer/assets/icons",
     "target": [
       "dmg"
     ]
   },
   "linux": {
-    "icon": "dist/assets/icons",
+    "icon": "dist/renderer/assets/icons",
     "target": [
       "AppImage"
     ]

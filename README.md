@@ -14,6 +14,7 @@ Based on: https://github.com/maximegris/angular-electron (electron + angular)
 
 Currently runs with:
 
+- German UI :)
 - Angular v13.2.4
 - Electron v17.1.0
 
@@ -32,10 +33,11 @@ You can override each used resource with the following env variables:
 
 ## Project structure
 
-| Folder | Description                                      |
-|--------|--------------------------------------------------|
-| app    | Electron main process folder (NodeJS)            |
-| src    | Electron renderer process folder (Web / Angular) |
+| Folder       | Description                                      |
+|--------------|--------------------------------------------------|
+| src/main     | Electron main process folder (NodeJS)            |
+| src/bridge   | Electron and angular shared files (TypeScript)   |
+| src/renderer | Electron renderer process folder (Web / Angular) |
 
 
 ## Included Commands
