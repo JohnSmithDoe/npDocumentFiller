@@ -1,0 +1,32 @@
+@use 'sass:map';
+@use '@angular/material' as mat;
+
+@import '@angular/material/prebuilt-themes/indigo-pink.css';
+@import 'material-icons/iconfont/material-icons.css';
+
+/* You can add global styles to this file, and also import other style files */
+html, body {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  font-family: Roboto, Arial, Helvetica, sans-serif;
+}
+
+mat-checkbox.wrap-label{
+  .mat-checkbox-layout{
+    white-space: normal !important;
+  }
+}
+
+app-field-node{
+  .mat-form-field-wrapper {
+    padding-bottom: 0;
+  }
+}
+
+$color-green:  mat.get-color-from-palette(mat.$green-palette, 600);
+
+.btn-success {
+  background-color: $color-green;
+  color: #f0f0f0;
+}
