@@ -1,21 +1,21 @@
 import {ipcMain, IpcMainEvent} from 'electron';
-import {EVPIChannels, ITemplateDocument, ITemplateInput} from '../bridge/shared.model';
+import {EAppChannels, ITemplateDocument, ITemplateInput} from '../bridge/shared.model';
 import {VPIAssistant} from './assistant';
 
 type TApiDescription = {
-  [key in EVPIChannels]: (event: IpcMainEvent, ...args: any[]) => void
+  [key in EAppChannels]: (event: IpcMainEvent, ...args: any[]) => void
 };
 
 export class VPIApiController {
 
   private api: TApiDescription = {
-    [EVPIChannels.GET]:         (event: IpcMainEvent, arg) => this.getFileTemplates(event, arg),
-    [EVPIChannels.ADD]:         (event: IpcMainEvent, arg) => this.addFileTemplate(event, arg),
-    [EVPIChannels.EXPORT]:      (event: IpcMainEvent, exportFolder: string, exportFields: ITemplateInput[]) => this.exportTemplates(event, exportFolder, exportFields),
-    [EVPIChannels.REMOVE]:      (event: IpcMainEvent, filename: string) => this.removeFileTemplate(event, filename),
-    [EVPIChannels.OPEN]:        (event: IpcMainEvent, filename: string) => this.openFileWithExplorer(event, filename),
-    [EVPIChannels.OPEN_OUTPUT]: (event: IpcMainEvent, folder: string) => this.openOutputWithExplorer(event, folder),
-    [EVPIChannels.SAVE]:        (event: IpcMainEvent, template: ITemplateDocument) => this.saveTemplates(event, template),
+    [EAppChannels.GET]:         (event: IpcMainEvent, arg) => this.getFileTemplates(event, arg),
+    [EAppChannels.ADD]:         (event: IpcMainEvent, arg) => this.addFileTemplate(event, arg),
+    [EAppChannels.EXPORT]:      (event: IpcMainEvent, exportFolder: string, exportFields: ITemplateInput[]) => this.exportTemplates(event, exportFolder, exportFields),
+    [EAppChannels.REMOVE]:      (event: IpcMainEvent, filename: string) => this.removeFileTemplate(event, filename),
+    [EAppChannels.OPEN]:        (event: IpcMainEvent, filename: string) => this.openFileWithExplorer(event, filename),
+    [EAppChannels.OPEN_OUTPUT]: (event: IpcMainEvent, folder: string) => this.openOutputWithExplorer(event, folder),
+    [EAppChannels.SAVE]:        (event: IpcMainEvent, template: ITemplateDocument) => this.saveTemplates(event, template),
   };
 
   constructor(private readonly vpiAssistant: VPIAssistant) {
@@ -37,7 +37,11 @@ export class VPIApiController {
   }
 
   private exportTemplates(event: IpcMainEvent, exportFolder: string, exportFields: ITemplateInput[]) {
-    event.returnValue = this.vpiAssistant.createDocuments(exportFolder, exportFields);
+    console.log('40: exportTemplates');
+    this.vpiAssistant.createDocuments(exportFolder, exportFields).then(() => {
+      console.log('42: Ende');
+      event.reply(EAppChannels.EXPORT, ['Progressing']);
+    });
   }
 
   private saveTemplates(event: IpcMainEvent, template: ITemplateDocument) {

@@ -28,12 +28,10 @@ function createWindow(): VPIAssistant {
                             },
                           });
 
+  let indexUrl = 'http://localhost:4200';
   if (serve) {
-    const debug = require('electron-debug');
-    debug();
-
+    require('electron-debug')();
     require('electron-reloader')(module);
-    win.loadURL('http://localhost:4200');
   } else {
     // Path when running electron executable
     let pathIndex = '../renderer/index.html';
@@ -43,17 +41,11 @@ function createWindow(): VPIAssistant {
       pathIndex = '../dist/renderer/index.html';
     }
 
-    let indexUrl = url.format({
+    indexUrl = url.format({
                                 pathname: path.join(__dirname, pathIndex),
                                 protocol: 'file:',
                                 slashes:  true,
                               });
-
-    win.loadURL(indexUrl);
-
-    win.webContents.on('did-fail-load', () => {
-      win.loadURL(indexUrl); // REDIRECT TO FIRST WEBPAGE AGAIN
-    });
   }
 
   // Emitted when the window is closed.
@@ -63,6 +55,23 @@ function createWindow(): VPIAssistant {
     // when you should delete the corresponding element.
     win = null;
   });
+
+  win.webContents.on('did-fail-load', (event,errorCode, errorDesc, validatedURL, isMain) => {
+    // ISSUE: Maybe due to routing or some path we have to redirect to the index page
+    console.log('59: did-fail-load', errorCode, errorDesc, validatedURL, isMain);
+    win.loadURL(indexUrl); // REDIRECT TO FIRST WEBPAGE AGAIN
+  });
+  win.webContents.on('will-navigate', (ev) => {
+    console.log('59: will-navigate');
+  })
+  win.webContents.on('will-prevent-unload', (ev) => {
+    // ev.preventDefault(); Prevents App Close as well...
+    console.log('59: will-prevent-unload', ev);
+  })
+  win.webContents.on('will-redirect', (ev) => {
+    console.log('59: will-redirect');
+  })
+  win.loadURL(indexUrl);
   return new VPIAssistant(win);
 }
 

@@ -12,9 +12,11 @@ export interface ITemplateField {
   export?: boolean;
 }
 
+export type TTemplateType = 'pdf' | 'xlsx' | 'resource';
+
 export interface ITemplateDocument {
   id: string;
-  type: 'pdf' | 'xlsx' | 'resource';
+  type: TTemplateType;
   name: string;
   filename: string;
   previewfile: string;
@@ -24,9 +26,9 @@ export interface ITemplateDocument {
   export?: boolean;
 }
 
-export type TVPIDatabase = { [key: string]: ITemplateDocument };
+export type TAppDatabase = { [key: string]: ITemplateDocument };
 
-export enum EVPIChannels {
+export enum EAppChannels {
   GET         = 'get-templates',
   ADD         = 'add-template',
   EXPORT      = 'export-templates',

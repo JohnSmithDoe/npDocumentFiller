@@ -1,6 +1,6 @@
 import {Injectable} from '@angular/core';
 import {ipcRenderer} from 'electron';
-import {EVPIChannels, ITemplateDocument, ITemplateInput} from '../../../bridge/shared.model';
+import {EAppChannels, ITemplateDocument, ITemplateInput} from '../../../bridge/shared.model';
 
 @Injectable({
               providedIn: 'root'
@@ -39,40 +39,44 @@ export class ElectronService {
 
   private get renderer() { return this.isElectron ? this.ipcRenderer : undefined;}
 
-  private sendSync(channel: EVPIChannels, ...data: any) {
+  private sendSync(channel: EAppChannels, ...data: any) {
     console.log('Send on channel: ', channel);
     return this.renderer?.sendSync(channel, ...data);
   }
+  private sendASync(channel: EAppChannels, ...data: any) {
+    console.log('Send on channel: ', channel);
+    return this.renderer?.send(channel, ...data);
+  }
 
   getTemplates(): ITemplateDocument[] {
-    return this.sendSync(EVPIChannels.GET);
+    return this.sendSync(EAppChannels.GET);
   }
 
   addFileTemplate(): ITemplateDocument[] {
-    return this.sendSync(EVPIChannels.ADD);
+    return this.sendSync(EAppChannels.ADD);
   }
 
   save(data: ITemplateDocument) {
-    return this.sendSync(EVPIChannels.SAVE, data);
+    return this.sendSync(EAppChannels.SAVE, data);
   }
 
   export(foldername: string, data: ITemplateInput[]) {
-    return this.sendSync(EVPIChannels.EXPORT, data, foldername);
+    return this.sendSync(EAppChannels.EXPORT, data, foldername);
   }
 
   openFileWithExplorer(filename: string) {
-    return this.sendSync(EVPIChannels.OPEN, filename);
+    return this.sendSync(EAppChannels.OPEN, filename);
   }
 
   openOutputFolder(folder: string) {
-    return this.sendSync(EVPIChannels.OPEN_OUTPUT, folder);
+    return this.sendSync(EAppChannels.OPEN_OUTPUT, folder);
   }
 
-  createDocuments(exportFolder: string, exportedFields: ITemplateInput[]): string[] {
-    return this.sendSync(EVPIChannels.EXPORT, exportFolder, exportedFields.map(({ids, value, ...field}) => ({ids, value})));
+  createDocuments(exportFolder: string, exportedFields: ITemplateInput[]) {
+    return this.sendASync(EAppChannels.EXPORT, exportFolder, exportedFields.map(({ids, value, ...field}) => ({ids, value})));
   }
 
   removeDocument(template: ITemplateDocument) {
-    return this.sendSync(EVPIChannels.REMOVE, template.filename);
+    return this.sendSync(EAppChannels.REMOVE, template.filename);
   }
 }

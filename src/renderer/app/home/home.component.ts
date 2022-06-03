@@ -115,7 +115,10 @@ export class HomeComponent implements OnInit, OnDestroy {
 
   createDocuments() {
     this.updateExportFolder();
-    this.exportMsgs = this.electronService.createDocuments(this.exportFolder, this.exportedFields);
+    // this.exportMsgs =
+    this.electronService.createDocuments(this.exportFolder, this.exportedFields);
+   console.log(this.exportMsgs);
+   return;
     if (!this.exportMsgs?.find(msg => msg.startsWith('FEHLER'))) {
       const snack = this.snackBarService.open('Dokumente wurden erstellt', 'Ordner öffnen', {duration: 5000});
       if (this.snackSub && !this.snackSub.closed) {
