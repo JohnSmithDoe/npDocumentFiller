@@ -11,13 +11,16 @@ export class ElectronService {
   // private readonly childProcess: typeof childProcess;
   // private readonly fs: typeof fs;
   private readonly ipcRenderer: typeof ipcRenderer;
-  public update$: EventEmitter<IDocument[]> = new EventEmitter<IDocument[]>();
+  public update$: EventEmitter<IDocument[]|string[]|boolean|undefined> = new EventEmitter<IDocument[]|string[]|boolean|undefined>();
+  public startRequest$: EventEmitter<EAppChannels> = new EventEmitter<EAppChannels>();
+  public error$: EventEmitter<any> = new EventEmitter<any>();
 
   constructor() {
     // Conditional imports
     if (this.isElectron) {
       this.ipcRenderer = window.require('electron').ipcRenderer;
       this.ipcRenderer.on(EAppChannels.CLIENT_RESPONSE, (event:IpcRendererEvent, templates: IDocument[]) => this.update$.emit(templates));
+      this.ipcRenderer.on(EAppChannels.CLIENT_ERROR, (event:IpcRendererEvent, err:any) => this.error$.emit(err));
       // this.webFrame = window.require('electron').webFrame;
       // this.childProcess = window.require('child_process');
       // this.fs = window.require('fs');
@@ -44,6 +47,7 @@ export class ElectronService {
 
   private sendASync(channel: EAppChannels, ...data: any) {
     console.log('Send on channel: ', channel);
+    this.startRequest$.emit(channel);
     this.renderer?.invoke(channel, ...data).then((data) => this.update$.emit(data));
   }
 

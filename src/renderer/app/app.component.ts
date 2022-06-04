@@ -1,6 +1,7 @@
 import {Component, HostListener} from '@angular/core';
 import {MatIconRegistry} from '@angular/material/icon';
 import {APP_CONFIG} from '../environments/environment';
+import {AppService} from './services/app.service';
 import {ElectronService} from './services/electron.service';
 
 @Component({
@@ -9,9 +10,13 @@ import {ElectronService} from './services/electron.service';
              styleUrls:   ['./app.component.scss']
            })
 export class AppComponent {
+
+
+
   constructor(
-    private electronService: ElectronService,
-    private iconService: MatIconRegistry
+    private readonly electronService: ElectronService,
+    private readonly iconService: MatIconRegistry,
+    public readonly appService: AppService,
   ) {
     this.iconService.setDefaultFontSetClass('material-icons-sharp');
     console.log('APP_CONFIG', APP_CONFIG);

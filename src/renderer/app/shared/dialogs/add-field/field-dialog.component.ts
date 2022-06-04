@@ -54,5 +54,16 @@ export class FieldDialogComponent implements OnInit {
       this.current.column = input.replace(/[^a-zA-Z]/g, '').toUpperCase();
     }, 0);
   }
+  isDuplicated() {
+    const orig = this.data.possibleFields.find(field => field.id === this.current.id);
+    if(!orig) return false;
+    const current = `$${orig.name}.${this.current.column}${this.current.row}`;
+    return this.data.used.find(used => used.mappedName === current)
+  }
 
+  isValid() {
+    if(!this.data || !this.current.id || !this.current.name.length) return false;
+    if(this.data.type === 'pdf') return true;
+    return !this.isDuplicated();
+  }
 }

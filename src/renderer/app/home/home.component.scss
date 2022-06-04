@@ -42,12 +42,22 @@ $color-reddish: mat.get-color-from-palette(mat.$orange-palette, 300);
     }
   }
 
+  mat-panel-title {
+    flex: 1 1 40%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  mat-panel-description {
+    justify-content: flex-end;
+  }
+
   mat-card-actions {
     min-height: 40px;
   }
 
   mat-card {
     flex: 1;
+    width: calc(100% - 2rem);
 
     mat-form-field {
       .mat-form-field-wrapper {

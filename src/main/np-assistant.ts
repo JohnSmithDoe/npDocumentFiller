@@ -206,16 +206,17 @@ export class NpAssistant {
   }
 
   // noinspection JSMethodCanBeStatic
-  private async applyFieldsToXlsx(tmpCopy: string, fields: IMappedField[], inputs: IMappedInput[], outCopy: string) {
+  private async applyFieldsToXlsx(document: IXlsxDocument, tmpCopy: string, inputs: IMappedInput[], outCopy: string) {
+    const fields = document.mapped.filter(field => field.export);
     const workbook = new ExcelJS.Workbook();
     // read from a file
     await workbook.xlsx.readFile(tmpCopy);
     fields.forEach(mappedField => {
-      const sheetName = mappedField.origId.slice(1, mappedField.origId.indexOf('.'));
-      console.log('Seeeeeeeeeeeeeeht name', sheetName, mappedField);
+      let fullCellId = mappedField.mappedName;
+      const sheetName = fullCellId.slice(1, fullCellId.indexOf('.'));
       const sheet = workbook.worksheets.find(sheet => sheet.name === sheetName);
       if (sheet) {
-        const cell = mappedField.origId.slice(mappedField.origId.indexOf('.'));
+        const cell = fullCellId.slice(fullCellId.indexOf('.') + 1);
         const value = inputs.find(input => input.identifiers.includes(mappedField.origId))?.value;
         if (value) {
           sheet.getCell(cell).value = value;
@@ -224,17 +225,16 @@ export class NpAssistant {
         throw new Error('No Worksheet found');
       }
     });
-
-
-    try { await workbook.xlsx.writeFile(outCopy);} catch (e) {console.log(e); }
-
+    await workbook.xlsx.writeFile(outCopy);
   }
 
-  private applyFieldsToPdf(tmpCopy: string, fields: IMappedField[], inputs: IMappedInput[], outCopy: string) {
+  private applyFieldsToPdf(document: IPdfDocument, tmpCopy: string, inputs: IMappedInput[], outCopy: string) {
+    const fields: IMappedField[] = document.mapped.filter(field => field.export);
     const fdfFile = NpAssistant.extractFDFToTemp(tmpCopy, this.pdf);
     const {fdf, allValues} = this.pdf.readFDF(fdfFile);
     fields.forEach(mappedField => {
-      const fdfField = allValues.find(fdfValue => fdfValue.path === mappedField.origId);
+      const origField = document.fields.find(orig => orig.id === mappedField.origId);
+      const fdfField = allValues.find(fdfValue => fdfValue.path === origField.name);
       const value = inputs.find(input => input.identifiers.includes(mappedField.origId))?.value;
       if (value) {
         fdfField.value = value;
@@ -257,11 +257,9 @@ export class NpAssistant {
       const outCopy = path.join(outputFolder, basename);
 
       if (document.type === 'pdf') {
-        const fields = (document as IPdfDocument).mapped.filter(field => field.export);
-        this.applyFieldsToPdf(tmpCopy, fields, inputs, outCopy);
+        this.applyFieldsToPdf(document as IPdfDocument, tmpCopy, inputs, outCopy);
       } else if (document.type === 'xlsx') {
-        const fields = (document as IXlsxDocument).mapped.filter(field => field.export);
-        await this.applyFieldsToXlsx(tmpCopy, fields, inputs, outCopy);
+        await this.applyFieldsToXlsx(document as IXlsxDocument, tmpCopy, inputs, outCopy);
       } else {
         fs.copyFileSync(tmpCopy, outCopy);
       }

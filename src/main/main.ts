@@ -57,20 +57,8 @@ function createWindow(): NpAssistant {
   });
 
   win.webContents.on('did-fail-load', (event,errorCode, errorDesc, validatedURL, isMain) => {
-    // ISSUE: Maybe due to routing or some path we have to redirect to the index page
-    console.log('59: did-fail-load', errorCode, errorDesc, validatedURL, isMain);
     win.loadURL(indexUrl); // REDIRECT TO FIRST WEBPAGE AGAIN
   });
-  win.webContents.on('will-navigate', (ev) => {
-    console.log('59: will-navigate');
-  })
-  win.webContents.on('will-prevent-unload', (ev) => {
-    // ev.preventDefault(); Prevents App Close as well...
-    console.log('59: will-prevent-unload', ev);
-  })
-  win.webContents.on('will-redirect', (ev) => {
-    console.log('59: will-redirect');
-  })
   win.loadURL(indexUrl);
   return new NpAssistant(win);
 }

@@ -11,9 +11,8 @@ import {MatInputModule} from '@angular/material/input';
 import {MatSelectModule} from '@angular/material/select';
 import {MatTooltipModule} from '@angular/material/tooltip';
 import {MatTreeModule} from '@angular/material/tree';
+import {ModalComponent} from './components/modal/modal.component';
 
-import {DocumentNodeComponent} from './components/nodes/document/document-node.component';
-import {FieldNodeComponent} from './components/nodes/field/field-node.component';
 import {PageNotFoundComponent} from './components/page-not-found/page-not-found.component';
 import {FieldDialogComponent} from './dialogs/add-field/field-dialog.component';
 import {ConfirmDialogComponent} from './dialogs/confirm/confirm-dialog.component';
@@ -23,8 +22,7 @@ import {ConfirmDialogComponent} from './dialogs/confirm/confirm-dialog.component
               PageNotFoundComponent,
               FieldDialogComponent,
               ConfirmDialogComponent,
-              DocumentNodeComponent,
-              FieldNodeComponent,
+              ModalComponent
             ],
             imports: [
               CommonModule,
@@ -44,8 +42,7 @@ import {ConfirmDialogComponent} from './dialogs/confirm/confirm-dialog.component
               FormsModule,
               FieldDialogComponent,
               ConfirmDialogComponent,
-              DocumentNodeComponent,
-              FieldNodeComponent
+              ModalComponent
             ]
           })
 export class SharedModule {}

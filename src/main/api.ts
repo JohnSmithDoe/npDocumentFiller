@@ -8,7 +8,7 @@ type TApiDescription = {
 
 export class ApiController {
 
-  private api: Omit<TApiDescription, EAppChannels.CLIENT_RESPONSE> = {
+  private api: Omit<TApiDescription, EAppChannels.CLIENT_RESPONSE | EAppChannels.CLIENT_ERROR> = {
     [EAppChannels.GET]:         (event: IpcMainEvent) => this.getFileTemplates(event),
     [EAppChannels.REMOVE]:      (event: IpcMainEvent, filename: string) => this.removeFileTemplate(event, filename),
     [EAppChannels.OPEN]:        (event: IpcMainEvent, filename: string) => this.openFileWithExplorer(event, filename),
@@ -20,9 +20,15 @@ export class ApiController {
 
   constructor(private readonly npAssistant: NpAssistant) {
     for (const channel in this.api) {
-      ipcMain.handle(channel, (ev, ...args) => {
-        console.log('Got Message on ', channel, 'with: ', ...args);
-        return this.api[channel](ev, ...args);
+      ipcMain.handle(channel, async (ev, ...args) => {
+        console.log('Recived on ', channel);
+        try {
+          const result = await this.api[channel](ev, ...args);
+          ev.sender.send(EAppChannels.CLIENT_RESPONSE, result);
+        } catch (e) {
+          console.log(e);
+          ev.sender.send(EAppChannels.CLIENT_ERROR, e);
+        }
       });
     }
   }
@@ -30,35 +36,31 @@ export class ApiController {
   // -------------------------- Sync --------------------------------------------
 
   private removeFileTemplate(event: IpcMainEvent, filename: string) {
-    event.sender.send(EAppChannels.CLIENT_RESPONSE, this.npAssistant.removeFileTemplate(filename));
+     this.npAssistant.removeFileTemplate(filename);
   }
 
   private getFileTemplates(event: IpcMainEvent) {
-    event.sender.send(EAppChannels.CLIENT_RESPONSE, this.npAssistant.getFileTemplates());
+    return this.npAssistant.getFileTemplates();
   }
 
   private saveTemplate(event: IpcMainEvent, template: IDocument) {
-    event.sender.send(EAppChannels.CLIENT_RESPONSE, this.npAssistant.saveTemplate(template));
+     this.npAssistant.saveTemplate(template);
   }
 
   private openFileWithExplorer(event: IpcMainEvent, filename: string) {
-    this.npAssistant.openFileWithExplorer(filename);
+     this.npAssistant.openFileWithExplorer(filename);
   }
 
   private openOutputWithExplorer(event: IpcMainEvent, folder: string) {
-    this.npAssistant.openOutputFolderWithExplorer(folder);
+     this.npAssistant.openOutputFolderWithExplorer(folder);
   }
 
   private addFileTemplate(event: IpcMainEvent) {
-    this.npAssistant.addNewFileTemplate().then(() => {
-      event.sender.send(EAppChannels.CLIENT_RESPONSE, this.npAssistant.getFileTemplates());
-    });
+    return this.npAssistant.addNewFileTemplate();
   }
 
   private exportTemplates(event: IpcMainEvent, exportFolder: string, exportFields: IMappedInput[]) {
-    this.npAssistant.createDocuments(exportFolder, exportFields).then(() => {
-      event.sender.send(EAppChannels.CLIENT_RESPONSE, this.npAssistant.getFileTemplates());
-    });
+    return this.npAssistant.createDocuments(exportFolder, exportFields);
   }
 }
 

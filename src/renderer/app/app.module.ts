@@ -8,19 +8,23 @@ import {AppRoutingModule} from './app-routing.module';
 import {AppComponent} from './app.component';
 
 import {HomeModule} from './home/home.module';
+import {AppService} from './services/app.service';
 import {ElectronService} from './services/electron.service';
+import {SharedModule} from './shared/shared.module';
 
 @NgModule({
             declarations: [AppComponent],
-            imports:      [
+            imports: [
               BrowserModule,
               BrowserAnimationsModule,
               HomeModule,
               AppRoutingModule,
+              SharedModule,
             ],
             providers:    [
               {provide: MAT_FORM_FIELD_DEFAULT_OPTIONS, useValue: {appearance: 'outline', floatLabel: 'always'}},
-              ElectronService
+              ElectronService,
+              AppService,
             ],
             bootstrap:    [AppComponent]
           })

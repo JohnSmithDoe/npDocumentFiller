@@ -46,4 +46,5 @@ export enum EAppChannels {
   ADD             = 'add-template',
   EXPORT          = 'export-templates',
   CLIENT_RESPONSE = 'client-response',
+  CLIENT_ERROR = 'client-error',
 }
