@@ -84,13 +84,9 @@ export class HomeComponent implements OnInit, OnDestroy {
   }
 
   private updateDataSource(newData: IDocument[]) {
-    console.log('update data', (newData || []).map(doc => ((doc as any).mapped || []).map(field => field.export + ' export ' + field.id)));
     this.dataSource = newData;
     if (this.dataSource?.length) {
-      // assignDeep(this.dataSource, newData);
       this.updateExportedFields();
-    } else {
-      this.dataSource = newData;
     }
   }
 
@@ -103,8 +99,8 @@ export class HomeComponent implements OnInit, OnDestroy {
   }
 
   private updateExportedFields() {
-
     const mappedFields = this.dataSource
+                             .filter(document => document.export)
                              .map(document => {
                                if (document.type === 'pdf') return (document as IPdfDocument).mapped;
                                if (document.type === 'xlsx') return (document as IXlsxDocument).mapped;
@@ -196,11 +192,13 @@ export class HomeComponent implements OnInit, OnDestroy {
 
   changedDocument(template: IDocument) {
     this.electronService.save(template);
+    this.updateExportedFields();
   }
 
   changedField(field: IMappedField) {
     const template = this.findTemplate(field.origId);
     this.electronService.save(template);
+    this.updateExportedFields();
   }
 
   showConfirmDialog(document: IDocument, field: IMappedField) {

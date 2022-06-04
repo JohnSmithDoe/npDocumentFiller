@@ -21,13 +21,13 @@
             >{{doc.name}}</mat-checkbox>
           </mat-panel-title>
           <mat-panel-description>
-            <button *ngIf="doc.type !== 'resource'" (click)="showFieldMappingDialog($any(doc)); $event.stopPropagation()" color="primary" mat-icon-button matTooltip="Feld hinzufügen" aria-label="Open the field mapping dialog">
-              <mat-icon class="mat-icon-rtl-mirror">add</mat-icon>
-            </button>
-
             <button *ngIf="!!$any(doc).previewfile?.length" (click)="showFieldMappingDocument(doc); $event.stopPropagation()" color="primary" mat-icon-button matTooltip="Feldnamen im Dokument anzeigen"
                     aria-label="Open the field mapping pdf">
               <mat-icon class="mat-icon-rtl-mirror">description</mat-icon>
+            </button>
+
+            <button *ngIf="doc.type !== 'resource'" (click)="showFieldMappingDialog($any(doc)); $event.stopPropagation()" color="primary" mat-icon-button matTooltip="Feld hinzufügen" aria-label="Open the field mapping dialog">
+              <mat-icon class="mat-icon-rtl-mirror">add</mat-icon>
             </button>
 
             <button (click)="showDocument(doc); $event.stopPropagation()" color="primary" mat-icon-button matTooltip="Orginal Dokument öffnen" aria-label="Open the original document">
@@ -40,16 +40,28 @@
 
           </mat-panel-description>
         </mat-expansion-panel-header>
-        <div *ngFor="let node of $any(doc).mapped || []">
-          <mat-form-field>
+        <ng-container *ngFor="let node of $any(doc).mapped || []">
+          <mat-form-field class="no-padding">
             <mat-label>{{node.mappedName}}</mat-label>
             <input matInput [(ngModel)]="node.clearName" type="text" placeholder="{{node.mappedName}}" (ngModelChange)="changingName()" (blur)="blurNameInput(node)">
           </mat-form-field>
-          <button (click)="showConfirmDialog(null, node)" color="warn" mat-icon-button matTooltip="Dokument entfernen" aria-label="Remove the selected document">
-            <mat-icon class="mat-icon-rtl-mirror">delete</mat-icon>
+          <div class="field-actions">
+            <button (click)="showConfirmDialog(null, node)" color="warn" mat-icon-button matTooltip="Dokument entfernen" aria-label="Remove the selected document">
+              <mat-icon class="mat-icon-rtl-mirror">delete</mat-icon>
+            </button>
+            <mat-checkbox color="primary" [(ngModel)]="node.export" (ngModelChange)="changedField(node)">Exportieren &nbsp;</mat-checkbox>
+          </div>
+        </ng-container>
+        <ng-container *ngIf="!$any(doc).mapped">
+          <p class="no-add">Diese Vorlage kann nur kopiert werden.</p>
+        </ng-container>
+        <ng-container *ngIf="$any(doc).mapped?.length === 0">
+          <p class="add-alt">Bitte füge erst ein neues Feld hinzu
+          <button *ngIf="doc.type !== 'resource'" (click)="showFieldMappingDialog($any(doc)); $event.stopPropagation()" color="primary" mat-icon-button matTooltip="Feld hinzufügen" aria-label="Open the field mapping dialog">
+            <mat-icon class="mat-icon-rtl-mirror">add</mat-icon>
           </button>
-          <mat-checkbox color="primary" [(ngModel)]="node.export" (ngModelChange)="changedField(node)">Exportieren &nbsp;</mat-checkbox>
-        </div>
+          </p>
+        </ng-container>
       </mat-expansion-panel>
     </mat-accordion>
 
