@@ -31,7 +31,7 @@ function createWindow(): VPIAssistant {
   let indexUrl = 'http://localhost:4200';
   if (serve) {
     require('electron-debug')();
-    require('electron-reloader')(module);
+    require('electron-reloader')(module, {ignore: /data|[\/\\]\./, argv: []});
   } else {
     // Path when running electron executable
     let pathIndex = '../renderer/index.html';
