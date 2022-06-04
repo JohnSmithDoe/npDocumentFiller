@@ -10,6 +10,7 @@
     <mat-divider></mat-divider>
     <mat-list *ngIf="dataSource.data?.length">
       <h4>Vorlagen</h4>
+      <!--suppress TypeScriptValidateTypes -->
       <mat-tree [dataSource]="dataSource" [treeControl]="treeControl" class="tree" #documenttree [trackBy]="trackBy">
         <!-- This is the tree node template for expandable nodes -->
         <mat-nested-tree-node *matTreeNodeDef="let node; when: hasChild">
@@ -25,12 +26,12 @@
 
         <!-- This is the tree node template for leaf nodes -->
         <mat-tree-node *matTreeNodeDef="let node">
-          <app-document-node *ngIf="!!node.fields" [node]="node" [treeControl]="treeControl"
+          <app-document-node *ngIf="isDocument(node)" [node]="node" [treeControl]="treeControl"
                              (changed)="changedDocument($event)"
                              (removed)="showConfirmDialog($event, null)"
                              (addfield)="showFieldMappingDialog($event)"
           ></app-document-node>
-          <app-field-node *ngIf="!node.fields" [node]="node" [treeControl]="treeControl"
+          <app-field-node *ngIf="!isDocument(node)" [node]="node" [treeControl]="treeControl"
                           (changed)="changedField($event)" (removed)="showConfirmDialog(null, $event)"
           ></app-field-node>
         </mat-tree-node>
@@ -84,8 +85,8 @@
       <h4>Werte die in die Unterlagen eingefügt werden</h4>
       <div *ngFor="let field of exportedFields">
         <mat-form-field>
-          <mat-label>{{field.name}}</mat-label>
-          <input matInput [(ngModel)]="field.value" type="text" placeholder="{{field.name}}">
+          <mat-label>{{field.clearName}}</mat-label>
+          <input matInput [(ngModel)]="field.value" type="text" placeholder="{{field.clearName}}">
           <mat-hint>Gleiche Feldnamen werden zusammengefasst</mat-hint>
         </mat-form-field>
         <small><strong>Verwendet in: </strong>{{field.info}}</small>

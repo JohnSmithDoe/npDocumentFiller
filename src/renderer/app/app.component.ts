@@ -1,4 +1,4 @@
-import {Component} from '@angular/core';
+import {Component, HostListener} from '@angular/core';
 import {MatIconRegistry} from '@angular/material/icon';
 import {APP_CONFIG} from '../environments/environment';
 import {ElectronService} from './services/electron.service';
@@ -18,10 +18,8 @@ export class AppComponent {
 
     if (electronService.isElectron) {
       console.log('Run in electron');
+
       // ISSUE: Maybe due to routing or some path in electron we have to prevent page unload on click.... not needed in browser
-      window.addEventListener('beforeunload', (ev) => {
-         ev.returnValue = false;
-      });
     } else {
       console.log('Run in browser');
     }

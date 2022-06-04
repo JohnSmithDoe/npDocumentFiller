@@ -1,7 +1,7 @@
 <div class="mat-tree-node">
   <mat-form-field>
-    <mat-label>{{node.value}}</mat-label>
-    <input matInput [(ngModel)]="node.name" type="text" placeholder="{{node.value}}" (ngModelChange)="changingName()" (blur)="blurNameInput(node)">
+    <mat-label>{{node.mappedName}}</mat-label>
+    <input matInput [(ngModel)]="node.clearName" type="text" placeholder="{{node.mappedName}}" (ngModelChange)="changingName()" (blur)="blurNameInput(node)">
 
   </mat-form-field>
   <button (click)="removed.emit(node)" color="warn" mat-icon-button matTooltip="Dokument entfernen" aria-label="Remove the selected document">

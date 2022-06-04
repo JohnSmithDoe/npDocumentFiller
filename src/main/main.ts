@@ -4,13 +4,13 @@ import {app, BrowserWindow} from 'electron';
 import * as fs from 'fs';
 import * as path from 'path';
 import * as url from 'url';
-import {VPIAssistant} from './assistant';
+import {NpAssistant} from './np-assistant';
 
 let win: BrowserWindow = null;
 const args  = process.argv.slice(1),
       serve = args.some(val => val === '--serve');
 
-function createWindow(): VPIAssistant {
+function createWindow(): NpAssistant {
 
   // Create the browser window.
   win = new BrowserWindow({
@@ -72,7 +72,7 @@ function createWindow(): VPIAssistant {
     console.log('59: will-redirect');
   })
   win.loadURL(indexUrl);
-  return new VPIAssistant(win);
+  return new NpAssistant(win);
 }
 
 try {

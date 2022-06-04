@@ -21,6 +21,9 @@
   "files": [
     "src/main/main.ts"
   ],
+  "include": [
+   "src/bridge/**/*.ts"
+  ],
   "exclude": [
     "node_modules",
     "**/*.spec.ts"

@@ -1,6 +1,6 @@
 import {Component, Inject, OnInit} from '@angular/core';
 import {MAT_DIALOG_DATA, MatDialogRef} from '@angular/material/dialog';
-import {ITemplateField} from '../../../../../bridge/shared.model';
+import {IMappedField} from '../../../../../bridge/shared.model';
 
 @Component({
              selector:    'app-field-dialog',
@@ -8,27 +8,51 @@ import {ITemplateField} from '../../../../../bridge/shared.model';
              styleUrls:   ['./field-dialog.component.scss']
            })
 export class FieldDialogComponent implements OnInit {
-  field = {
-    name: '',
-    id:   '',
+  current = {
+    name:   '',
+    id:     '',
+    column: '',
+    row:    undefined,
   };
 
   constructor(
     public dialogRef: MatDialogRef<FieldDialogComponent>,
-    @Inject(MAT_DIALOG_DATA) public data: ITemplateField[],
+    @Inject(MAT_DIALOG_DATA) public data: { type: 'pdf' | 'xlsx', possibleFields: { id: string, name: string, disabled: boolean }[], used: IMappedField[] },
   ) { }
 
   ngOnInit(): void {
+    this.data.possibleFields.forEach(field => {
+      field.disabled = !!this.data.used.find(item=> item.origId === field.id);
+    })
   }
 
-  async doSomething() {
-    const {...copy} = this.data.find(field => field.id === this.field.id);
-    copy.name = this.field.name;
-    copy.export = true;
-    this.dialogRef.close(copy);
+  createMappedField() {
+    // const identifier = this.data.type === 'pdf'
+    //   ? this.current.id
+    //   : `$${this.current.id}.${this.current.column}${this.current.row}`;
+    const orig = this.data.possibleFields.find(field => field.id === this.current.id);
+    const mappedName = this.data.type === 'pdf'
+      ? 'Feld ' + this.data.possibleFields.findIndex(field => field.id === this.current.id)
+      : `$${orig.name}.${this.current.column}${this.current.row}`;
+
+    const mappedField: IMappedField = {
+      origId:    this.current.id,
+      clearName: this.current.name,
+      export:    true,
+      mappedName
+    };
+
+    this.dialogRef.close(mappedField);
   }
 
   onCloseClick(): void {
     this.dialogRef.close();
   }
+
+  columnChanged(input: string) {
+    setTimeout(() => {
+      this.current.column = input.replace(/[^a-zA-Z]/g, '').toUpperCase();
+    }, 0);
+  }
+
 }

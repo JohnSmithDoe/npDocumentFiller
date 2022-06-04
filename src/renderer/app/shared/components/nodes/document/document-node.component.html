@@ -1,6 +1,6 @@
 <div class="mat-tree-node">
 
-  <mat-checkbox class="wrap-label" [(ngModel)]="node.export" (ngModelChange)="changed.emit(node)"
+  <mat-checkbox class="wrap-label" [(ngModel)]="node.export" (ngModelChange)="changed.emit(node)" (click)="$event.stopPropagation();"
                 matTooltip="Dokument aus-/abwählen" aria-label="Export the selected document"
                 color="primary"
   >{{node.name}}</mat-checkbox>

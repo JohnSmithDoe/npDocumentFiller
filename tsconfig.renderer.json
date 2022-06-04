@@ -24,11 +24,11 @@
     "node_modules"
   ],
   "include": [
-    "bridge/**/*.ts"
+    "src/bridge/**/*.ts"
   ],
   "angularCompilerOptions": {
-    "strictTemplates": true,
-    "fullTemplateTypeCheck": true,
+    "strictTemplates": false,
+    "fullTemplateTypeCheck": false,
     "annotateForClosureCompiler": true,
     "strictInjectionParameters": true,
     "skipTemplateCodegen": false,

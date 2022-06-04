@@ -1,6 +1,6 @@
 import {NestedTreeControl} from '@angular/cdk/tree';
 import {Component, EventEmitter, Input, OnDestroy, OnInit, Output} from '@angular/core';
-import {ITemplateDocument} from '../../../../../../bridge/shared.model';
+import {IDocument, IMappedField, IPdfDocument, IResourceDocument, IXlsxDocument} from '../../../../../../bridge/shared.model';
 import {ElectronService} from '../../../../services/electron.service';
 
 @Component({
@@ -10,11 +10,11 @@ import {ElectronService} from '../../../../services/electron.service';
            })
 export class DocumentNodeComponent implements OnInit, OnDestroy {
 
-  @Input() node: ITemplateDocument;
-  @Input() treeControl: NestedTreeControl<ITemplateDocument>;
-  @Output() changed: EventEmitter<ITemplateDocument> = new EventEmitter<ITemplateDocument>();
-  @Output() removed: EventEmitter<ITemplateDocument> = new EventEmitter<ITemplateDocument>();
-  @Output() addfield: EventEmitter<ITemplateDocument> = new EventEmitter<ITemplateDocument>();
+  @Input() node: IPdfDocument | IXlsxDocument | IResourceDocument;
+  @Input() treeControl: NestedTreeControl<IDocument|IMappedField>;
+  @Output() changed: EventEmitter<IDocument> = new EventEmitter<IDocument>();
+  @Output() removed: EventEmitter<IDocument> = new EventEmitter<IDocument>();
+  @Output() addfield: EventEmitter<(IXlsxDocument | IPdfDocument)> = new EventEmitter<(IXlsxDocument | IPdfDocument)>();
 
 
   constructor(
@@ -27,11 +27,11 @@ export class DocumentNodeComponent implements OnInit, OnDestroy {
   ngOnDestroy(): void {
   }
 
-  showFieldMappingDocument(node: ITemplateDocument) {
+  showFieldMappingDocument(node: IPdfDocument) {
     this.electronService.openFileWithExplorer(node.previewfile);
   }
 
-  showDocument(node: ITemplateDocument) {
+  showDocument(node: IDocument) {
     this.electronService.openFileWithExplorer(node.filename);
   }
 }

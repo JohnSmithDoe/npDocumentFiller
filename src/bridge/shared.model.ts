@@ -1,39 +1,49 @@
-export interface ITemplateInput {
-  ids: string[];
-  value: any;
-}
-
-export interface ITemplateField {
-  id: string;
-  type: 'fdf' | 'cell';
-  name: string;
-  intern: string;
-  value: any;
-  export?: boolean;
-}
-
 export type TTemplateType = 'pdf' | 'xlsx' | 'resource';
 
-export interface ITemplateDocument {
+export interface IDocument<T = TTemplateType> {
   id: string;
-  type: TTemplateType;
   name: string;
   filename: string;
-  previewfile: string;
-  fields: ITemplateField[];
-  mapped: ITemplateField[];
   mtime: number;
   export?: boolean;
+  type: T;
 }
 
-export type TAppDatabase = { [key: string]: ITemplateDocument };
+export interface IResourceDocument extends IDocument<'resource'> {}
+
+export interface IXlsxDocument extends IDocument<'xlsx'> {
+  sheets: { id: string, name:string }[];
+  mapped: IMappedField[];
+}
+
+export interface IPdfDocument extends IDocument<'pdf'> {
+  fields: { id: string, name:string }[];
+  mapped: IMappedField[];
+  previewfile: string;
+}
+
+export interface IMappedField {
+  origId: string;
+  clearName: string;
+  mappedName: string;
+  export?: boolean;
+
+}
+export interface IMappedInput {
+  identifiers: string[];
+  value: string;
+}
+
+
+export type TAppDatabase = { [key: string]: IDocument };
 
 export enum EAppChannels {
-  GET         = 'get-templates',
-  ADD         = 'add-template',
-  EXPORT      = 'export-templates',
-  REMOVE      = 'remove-template',
-  OPEN        = 'open-file',
-  OPEN_OUTPUT = 'open-output',
-  SAVE        = 'save-templates'
+  GET             = 'get-templates',
+  REMOVE          = 'remove-template',
+  OPEN            = 'open-file',
+  OPEN_OUTPUT     = 'open-output',
+  SAVE            = 'save-templates',
+  ADD             = 'add-template',
+  EXPORT          = 'export-templates',
+  CLIENT_RESPONSE = 'client-response',
 }

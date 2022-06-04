@@ -1,21 +1,31 @@
-import {ITemplateDocument} from '../../../bridge/shared.model';
+import {IDocument, IPdfDocument, IXlsxDocument,} from '../../../bridge/shared.model';
 
-export function assignDeep(target: ITemplateDocument[], source: ITemplateDocument[]) {
-  if (!source) return;
-  source.forEach(({mapped, ...newTemplate}) => {
-    const oldTemplate = target.find(oldOne => newTemplate.id === oldOne.id);
-    if (oldTemplate) {
-      Object.assign(oldTemplate, newTemplate);
-      mapped.forEach(newField => {
-        const oldField = oldTemplate.mapped.find(oldOne => oldOne.id === newField.id);
-        if (oldField) {
-          Object.assign(oldField, newField);
-        } else {
-          oldTemplate.mapped.push(newField);
-        }
-      });
+function assignTemplateFields<T extends IPdfDocument|IXlsxDocument>(template: T, oldTemplate: T) {
+  const {mapped, ...newTemplate} = template;
+  Object.assign(oldTemplate, newTemplate);
+  for (let i = 0; i < mapped.length; i++) {
+    let newField = mapped[i];
+    const oldField = oldTemplate.mapped.find(oldOne => oldOne.origId === newField.origId);
+    if (oldField) {
+      Object.assign(oldField, newField);
     } else {
-      target.push({mapped, ...newTemplate});
+      oldTemplate.mapped.push(newField);
+    }
+  }
+}
+
+export function assignDeep(target: IDocument[], source: IDocument[]) {
+  if (!source) return;
+  source.forEach(template => {
+    let oldTemplate = target.find(oldOne => (template.id === oldOne.id));
+    if(!oldTemplate) {
+      target.push(template);
+    }else if (template.type === 'pdf' && oldTemplate.type === 'pdf') {
+      assignTemplateFields(template as IPdfDocument, oldTemplate as IPdfDocument);
+    } else if (template.type === 'xlsx' && oldTemplate.type === 'xlsx') {
+      assignTemplateFields(template as IXlsxDocument, oldTemplate as IXlsxDocument);
+    } else {
+      Object.assign(oldTemplate, template);
     }
   });
 }

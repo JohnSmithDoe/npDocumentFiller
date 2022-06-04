@@ -1,61 +1,64 @@
 import {ipcMain, IpcMainEvent} from 'electron';
-import {EAppChannels, ITemplateDocument, ITemplateInput} from '../bridge/shared.model';
-import {VPIAssistant} from './assistant';
+import {EAppChannels, IDocument, IMappedInput} from '../bridge/shared.model';
+import {NpAssistant} from './np-assistant';
 
 type TApiDescription = {
   [key in EAppChannels]: (event: IpcMainEvent, ...args: any[]) => void
 };
 
-export class VPIApiController {
+export class ApiController {
 
-  private api: TApiDescription = {
-    [EAppChannels.GET]:         (event: IpcMainEvent, arg) => this.getFileTemplates(event, arg),
-    [EAppChannels.ADD]:         (event: IpcMainEvent, arg) => this.addFileTemplate(event, arg),
-    [EAppChannels.EXPORT]:      (event: IpcMainEvent, exportFolder: string, exportFields: ITemplateInput[]) => this.exportTemplates(event, exportFolder, exportFields),
+  private api: Omit<TApiDescription, EAppChannels.CLIENT_RESPONSE> = {
+    [EAppChannels.GET]:         (event: IpcMainEvent) => this.getFileTemplates(event),
     [EAppChannels.REMOVE]:      (event: IpcMainEvent, filename: string) => this.removeFileTemplate(event, filename),
     [EAppChannels.OPEN]:        (event: IpcMainEvent, filename: string) => this.openFileWithExplorer(event, filename),
     [EAppChannels.OPEN_OUTPUT]: (event: IpcMainEvent, folder: string) => this.openOutputWithExplorer(event, folder),
-    [EAppChannels.SAVE]:        (event: IpcMainEvent, template: ITemplateDocument) => this.saveTemplates(event, template),
+    [EAppChannels.SAVE]:        (event: IpcMainEvent, template: IDocument) => this.saveTemplate(event, template),
+    [EAppChannels.ADD]:         (event: IpcMainEvent, arg) => this.addFileTemplate(event),
+    [EAppChannels.EXPORT]:      (event: IpcMainEvent, exportFolder: string, exportFields: IMappedInput[]) => this.exportTemplates(event, exportFolder, exportFields),
   };
 
-  constructor(private readonly vpiAssistant: VPIAssistant) {
+  constructor(private readonly npAssistant: NpAssistant) {
     for (const channel in this.api) {
-      ipcMain.on(channel, this.api[channel]);
+      ipcMain.handle(channel, (ev, ...args) => {
+        console.log('Got Message on ', channel, 'with: ', ...args);
+        return this.api[channel](ev, ...args);
+      });
     }
   }
 
-  private removeFileTemplate(event: IpcMainEvent, arg) {
-    event.returnValue = this.vpiAssistant.removeFileTemplate(arg);
+  // -------------------------- Sync --------------------------------------------
+
+  private removeFileTemplate(event: IpcMainEvent, filename: string) {
+    event.sender.send(EAppChannels.CLIENT_RESPONSE, this.npAssistant.removeFileTemplate(filename));
   }
 
-  private getFileTemplates(event: IpcMainEvent, arg: any) {
-    event.returnValue = this.vpiAssistant.getFileTemplates();
+  private getFileTemplates(event: IpcMainEvent) {
+    event.sender.send(EAppChannels.CLIENT_RESPONSE, this.npAssistant.getFileTemplates());
   }
 
-  private addFileTemplate(event: IpcMainEvent, arg) {
-    event.returnValue = this.vpiAssistant.addFileTemplate();
-  }
-
-  private exportTemplates(event: IpcMainEvent, exportFolder: string, exportFields: ITemplateInput[]) {
-    console.log('40: exportTemplates');
-    this.vpiAssistant.createDocuments(exportFolder, exportFields).then(() => {
-      console.log('42: Ende');
-      event.reply(EAppChannels.EXPORT, ['Progressing']);
-    });
-  }
-
-  private saveTemplates(event: IpcMainEvent, template: ITemplateDocument) {
-    event.returnValue = this.vpiAssistant.saveTemplate(template);
+  private saveTemplate(event: IpcMainEvent, template: IDocument) {
+    event.sender.send(EAppChannels.CLIENT_RESPONSE, this.npAssistant.saveTemplate(template));
   }
 
   private openFileWithExplorer(event: IpcMainEvent, filename: string) {
-    this.vpiAssistant.openFileWithExplorer(filename);
-    event.returnValue = true;
+    this.npAssistant.openFileWithExplorer(filename);
   }
 
   private openOutputWithExplorer(event: IpcMainEvent, folder: string) {
-    this.vpiAssistant.openOutputFolderWithExplorer(folder);
-    event.returnValue = true;
+    this.npAssistant.openOutputFolderWithExplorer(folder);
+  }
+
+  private addFileTemplate(event: IpcMainEvent) {
+    this.npAssistant.addNewFileTemplate().then(() => {
+      event.sender.send(EAppChannels.CLIENT_RESPONSE, this.npAssistant.getFileTemplates());
+    });
+  }
+
+  private exportTemplates(event: IpcMainEvent, exportFolder: string, exportFields: IMappedInput[]) {
+    this.npAssistant.createDocuments(exportFolder, exportFields).then(() => {
+      event.sender.send(EAppChannels.CLIENT_RESPONSE, this.npAssistant.getFileTemplates());
+    });
   }
 }
 

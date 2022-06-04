@@ -9,7 +9,10 @@
 
 // ISSUE #1: Maybe due to routing or some path we have to redirect to the index page
 // ISSUE #2: To add npm packages to the main we have to add them to both package.jsons Maybe its not a good idea to keep the main in the src folder
+    - Do peerDependencies get installed ... probably not
 // ISSUE #3: How to get the encoding of a file instead of assuming win1252
+// ISSUE #4: Typing is not the best
+// ISSUE #4: Typing for tree control??? still strange
 
 # TODOs
 

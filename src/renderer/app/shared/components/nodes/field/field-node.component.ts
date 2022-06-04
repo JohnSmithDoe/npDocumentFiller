@@ -1,6 +1,6 @@
 import {NestedTreeControl} from '@angular/cdk/tree';
 import {Component, EventEmitter, Input, OnInit, Output} from '@angular/core';
-import {ITemplateDocument, ITemplateField} from '../../../../../../bridge/shared.model';
+import {IDocument, IMappedField} from '../../../../../../bridge/shared.model';
 
 @Component({
              selector:    'app-field-node',
@@ -9,10 +9,10 @@ import {ITemplateDocument, ITemplateField} from '../../../../../../bridge/shared
            })
 export class FieldNodeComponent implements OnInit {
 
-  @Input() node: ITemplateField;
-  @Input() treeControl: NestedTreeControl<ITemplateDocument>;
-  @Output() changed: EventEmitter<ITemplateField> = new EventEmitter<ITemplateField>();
-  @Output() removed: EventEmitter<ITemplateField> = new EventEmitter<ITemplateField>();
+  @Input() node: IMappedField;
+  @Input() treeControl: NestedTreeControl<IDocument|IMappedField>;
+  @Output() changed: EventEmitter<IMappedField> = new EventEmitter<IMappedField>();
+  @Output() removed: EventEmitter<IMappedField> = new EventEmitter<IMappedField>();
 
   private changedName = false;
 
@@ -21,7 +21,7 @@ export class FieldNodeComponent implements OnInit {
   ngOnInit(): void {
   }
 
-  blurNameInput(node: ITemplateField) {
+  blurNameInput(node: IMappedField) {
     if (this.changedName) {
       this.changedName = false;
       this.changed.emit(node);

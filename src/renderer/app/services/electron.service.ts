@@ -1,6 +1,7 @@
-import {Injectable} from '@angular/core';
+import {EventEmitter, Injectable} from '@angular/core';
 import {ipcRenderer} from 'electron';
-import {EAppChannels, ITemplateDocument, ITemplateInput} from '../../../bridge/shared.model';
+import {EAppChannels, IDocument, IMappedInput} from '../../../bridge/shared.model';
+import IpcRendererEvent = Electron.IpcRendererEvent;
 
 @Injectable({
               providedIn: 'root'
@@ -10,11 +11,13 @@ export class ElectronService {
   // private readonly childProcess: typeof childProcess;
   // private readonly fs: typeof fs;
   private readonly ipcRenderer: typeof ipcRenderer;
+  public update$: EventEmitter<IDocument[]> = new EventEmitter<IDocument[]>();
 
   constructor() {
     // Conditional imports
     if (this.isElectron) {
       this.ipcRenderer = window.require('electron').ipcRenderer;
+      this.ipcRenderer.on(EAppChannels.CLIENT_RESPONSE, (event:IpcRendererEvent, templates: IDocument[]) => this.update$.emit(templates));
       // this.webFrame = window.require('electron').webFrame;
       // this.childProcess = window.require('child_process');
       // this.fs = window.require('fs');
@@ -39,44 +42,42 @@ export class ElectronService {
 
   private get renderer() { return this.isElectron ? this.ipcRenderer : undefined;}
 
-  private sendSync(channel: EAppChannels, ...data: any) {
-    console.log('Send on channel: ', channel);
-    return this.renderer?.sendSync(channel, ...data);
-  }
   private sendASync(channel: EAppChannels, ...data: any) {
     console.log('Send on channel: ', channel);
-    return this.renderer?.send(channel, ...data);
+    this.renderer?.invoke(channel, ...data).then((data) => this.update$.emit(data));
   }
 
-  getTemplates(): ITemplateDocument[] {
-    return this.sendSync(EAppChannels.GET);
+  getTemplates(){
+    this.sendASync(EAppChannels.GET);
   }
 
-  addFileTemplate(): ITemplateDocument[] {
-    return this.sendSync(EAppChannels.ADD);
+  addFileTemplate() {
+    this.sendASync(EAppChannels.ADD);
   }
 
-  save(data: ITemplateDocument) {
-    return this.sendSync(EAppChannels.SAVE, data);
+  save(data: IDocument) {
+    this.sendASync(EAppChannels.SAVE, data);
   }
 
-  export(foldername: string, data: ITemplateInput[]) {
-    return this.sendSync(EAppChannels.EXPORT, data, foldername);
+  export(foldername: string, data: IMappedInput[]) {
+    this.sendASync(EAppChannels.EXPORT, data, foldername);
   }
 
   openFileWithExplorer(filename: string) {
-    return this.sendSync(EAppChannels.OPEN, filename);
+    this.sendASync(EAppChannels.OPEN, filename);
   }
 
   openOutputFolder(folder: string) {
-    return this.sendSync(EAppChannels.OPEN_OUTPUT, folder);
+    this.sendASync(EAppChannels.OPEN_OUTPUT, folder);
   }
 
-  createDocuments(exportFolder: string, exportedFields: ITemplateInput[]) {
-    return this.sendASync(EAppChannels.EXPORT, exportFolder, exportedFields.map(({ids, value, ...field}) => ({ids, value})));
+  createDocuments(exportFolder: string, exportedFields: IMappedInput[]) {
+    this.sendASync(EAppChannels.EXPORT,
+                          exportFolder,
+                          exportedFields.map(({identifiers, value, ...field}) => ({identifiers, value})));
   }
 
-  removeDocument(template: ITemplateDocument) {
-    return this.sendSync(EAppChannels.REMOVE, template.filename);
+  removeDocument(template: IDocument) {
+    this.sendASync(EAppChannels.REMOVE, template.filename);
   }
 }
