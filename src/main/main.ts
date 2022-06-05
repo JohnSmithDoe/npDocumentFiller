@@ -41,6 +41,7 @@ function createWindow(): NpAssistant {
       pathIndex = '../dist/renderer/index.html';
     }
 
+    // noinspection JSDeprecatedSymbols
     indexUrl = url.format({
                                 pathname: path.join(__dirname, pathIndex),
                                 protocol: 'file:',

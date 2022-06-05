@@ -10,10 +10,10 @@ import {showFilePickerSync} from './utils/electron.utils';
 import {startWithExpolorer} from './utils/shell.utils';
 
 const dataPath = process.env.APP_DATA || path.resolve('./data');
-const tmpPath = process.env.APP_TEMP || path.resolve('./data/tmp');
-const cachePath = process.env.APP_CACHE || path.resolve('./data/cache');
-const outputPath = process.env.APP_OUTPUT || path.resolve('./data/out');
-const configFile = process.env.APP_CONFIG || path.resolve('./data/config.json');
+const tmpPath = process.env.APP_TEMP || path.join(dataPath, 'tmp');
+const cachePath = process.env.APP_CACHE || path.join(dataPath, 'cache');
+const outputPath = process.env.APP_OUTPUT || path.join(dataPath, 'out');
+const configFile = process.env.APP_CONFIG || path.join(dataPath, 'config.json');
 
 export class NpAssistant {
 
@@ -100,14 +100,13 @@ export class NpAssistant {
   }
 
   private static copyAndValidateOriginal(document: IDocument, database: TAppDatabase, result: string[]) {
-    // check update time here i guess
     const tmpCopy = NpAssistant.copyToTempFolder(document.filename);
     const {mtimeMs} = fs.statSync(document.filename);
     if (document.mtime !== mtimeMs) {
       document.mtime = mtimeMs;
       NpAssistant.writeDatabase(database);
       result.push('*******************');
-      result.push(`WARNUNG: Die Orginal Datei [${document.name}] wurde verändert!!!`);
+      result.push(`WARNUNG: Die Original Datei [${document.name}] wurde verändert!!!`);
       result.push(`Bitte überprüfe ob die Felder noch passen.`);
       result.push(`Wenn nicht lösche am besten das Dokument und füge es danach noch einmal neu hinzu.`);
       result.push('*******************');
@@ -184,9 +183,9 @@ export class NpAssistant {
   async addNewFileTemplate(): Promise<IDocument[]> {
     const filename = showFilePickerSync(this.mainWindow, {
       defaultPath: '', title: 'Dokument verknüpfen', filters: [
+        {name: 'Alle Dokumente', extensions: ['*']},
         {name: 'Pdf Dokumente', extensions: ['pdf']},
         {name: 'Excel Dokumente', extensions: ['xlsx']},
-        {name: 'Alle Dokumente', extensions: ['*']},
       ]
     });
 

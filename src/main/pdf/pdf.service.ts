@@ -6,6 +6,10 @@ import {CFDFError, CFDFStarter, CFDFTagClose, CFDFTagKids, CFDFTagOpen, CFDFTagT
 
 const pdftk = process.env.APP_PDFTK_EXE || resolve(join('.', 'pdftk', 'bin', 'pdftk.exe'));
 
+// To get the encoding of a file we need to "guess" so we only split win and others :)
+const encoding = process.env.APP_ENCODING || (process.platform === 'win32' ? 'win1252' : 'utf8')
+
+
 function stripLastChars(txt: string, chars: string, trim = true) {
   const stripped = txt.endsWith(chars) ? txt.substring(0, txt.length - chars.length) : txt;
   return trim ? stripped.trim() : stripped;
@@ -88,7 +92,7 @@ function parseFields(data: string) {
       current = current.parent;
       data = data.substring(data.indexOf(CFDFTagClose) + CFDFTagClose.length).trim();
     } else {
-      // If a unexpected token occurs
+      // If an unexpected token occurs
       throw new Error(CFDFError + data.substring(0, 6));
     }
   }
@@ -153,18 +157,16 @@ export class PdfService {
     return CFDFStarter + output + CFDFTrailer;
   }
 
-  // TODO: how to get the encoding of the file??
   readFDF(filename: string): { fdf: IFDFModel; allValues: IFDFValue[]; fileContent: string } {
     const buffer = readFileSync(filename);
-    const fileContent = decode(buffer, 'win1252');
+    const fileContent = decode(buffer, encoding);
     const {fdf, allValues} = this.parseFDF(fileContent);
     return {fdf, allValues, fileContent};
   }
 
-  // TODO: can we use utf-8 in some way...
   writeFDF(filename: string, fdf: IFDFModel): string {
     const data = this.assembleFDF(fdf);
-    writeFileSync(filename, encode(data, 'win1252'));
+    writeFileSync(filename, encode(data, encoding));
     return data;
   }
 

@@ -21,7 +21,7 @@ export class ApiController {
   constructor(private readonly npAssistant: NpAssistant) {
     for (const channel in this.api) {
       ipcMain.handle(channel, async (ev, ...args) => {
-        console.log('Recived on ', channel);
+        console.log('Received on ', channel);
         try {
           const result = await this.api[channel](ev, ...args);
           ev.sender.send(EAppChannels.CLIENT_RESPONSE, result);

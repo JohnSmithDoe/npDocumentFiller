@@ -9,8 +9,6 @@ export interface IDocument<T = TTemplateType> {
   type: T;
 }
 
-export interface IResourceDocument extends IDocument<'resource'> {}
-
 export interface IXlsxDocument extends IDocument<'xlsx'> {
   sheets: { id: string, name:string }[];
   mapped: IMappedField[];

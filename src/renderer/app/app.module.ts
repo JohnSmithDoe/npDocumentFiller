@@ -12,9 +12,10 @@ import {AppService} from './services/app.service';
 import {ElectronService} from './services/electron.service';
 import {SharedModule} from './shared/shared.module';
 
+// noinspection JSUnusedGlobalSymbols
 @NgModule({
             declarations: [AppComponent],
-            imports: [
+            imports:      [
               BrowserModule,
               BrowserAnimationsModule,
               HomeModule,

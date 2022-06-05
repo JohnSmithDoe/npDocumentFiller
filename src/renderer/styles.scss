@@ -12,20 +12,9 @@ html, body {
   font-family: Roboto, Arial, Helvetica, sans-serif;
 }
 
-mat-checkbox.wrap-label {
-  .mat-checkbox-layout {
-    white-space: normal !important;
-  }
-}
-mat-checkbox.max-label {
-  label {
-  }
-}
-
-mat-card mat-form-field.no-padding {
-  .mat-form-field-wrapper {
+//noinspection ALL
+mat-card mat-form-field.no-padding .mat-form-field-wrapper {
     padding-bottom: 0;
-  }
 }
 
 $color-green: mat.get-color-from-palette(mat.$green-palette, 600);
