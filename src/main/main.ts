@@ -4,13 +4,14 @@ import {app, BrowserWindow} from 'electron';
 import * as fs from 'fs';
 import * as path from 'path';
 import * as url from 'url';
+import {EAppChannels} from '../bridge/shared.model';
 import {NpAssistant} from './np-assistant';
 
 let win: BrowserWindow = null;
 const args  = process.argv.slice(1),
       serve = args.some(val => val === '--serve');
 
-function createWindow(): NpAssistant {
+function createWindow(): void {
 
   // Create the browser window.
   win = new BrowserWindow({
@@ -49,6 +50,7 @@ function createWindow(): NpAssistant {
                               });
   }
 
+  let assistant: NpAssistant;
   // Emitted when the window is closed.
   win.on('closed', () => {
     // Dereference the window object, usually you would store window
@@ -60,8 +62,13 @@ function createWindow(): NpAssistant {
   win.webContents.on('did-fail-load', (event,errorCode, errorDesc, validatedURL, isMain) => {
     win.loadURL(indexUrl); // REDIRECT TO FIRST WEBPAGE AGAIN
   });
+  win.webContents.on('did-finish-load', (event,errorCode, errorDesc, validatedURL, isMain) => {
+    if(assistant){
+      event.sender.send(EAppChannels.FINISHED_LOAD, assistant.getFileTemplates());
+    }
+  });
+  assistant = new NpAssistant(win);
   win.loadURL(indexUrl);
-  return new NpAssistant(win);
 }
 
 try {

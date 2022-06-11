@@ -8,7 +8,7 @@ type TApiDescription = {
 
 export class ApiController {
 
-  private api: Omit<TApiDescription, EAppChannels.CLIENT_RESPONSE | EAppChannels.CLIENT_ERROR> = {
+  private api: Omit<TApiDescription, EAppChannels.CLIENT_UPDATE | EAppChannels.CLIENT_ERROR | EAppChannels.FINISHED_LOAD> = {
     [EAppChannels.GET]:         (event: IpcMainEvent) => this.getFileTemplates(event),
     [EAppChannels.REMOVE]:      (event: IpcMainEvent, filename: string) => this.removeFileTemplate(event, filename),
     [EAppChannels.OPEN]:        (event: IpcMainEvent, filename: string) => this.openFileWithExplorer(event, filename),
@@ -24,10 +24,9 @@ export class ApiController {
         console.log('Received on ', channel);
         try {
           const result = await this.api[channel](ev, ...args);
-          ev.sender.send(EAppChannels.CLIENT_RESPONSE, result);
+          ev.sender.send(EAppChannels.CLIENT_UPDATE, result);
         } catch (e) {
-          console.log(e);
-          ev.sender.send(EAppChannels.CLIENT_ERROR, e);
+          ev.sender.send(EAppChannels.CLIENT_ERROR, e.message.split('||'));
         }
       });
     }
@@ -39,27 +38,27 @@ export class ApiController {
      this.npAssistant.removeFileTemplate(filename);
   }
 
-  private getFileTemplates(event: IpcMainEvent) {
+  private getFileTemplates(event: IpcMainEvent): IDocument[] {
     return this.npAssistant.getFileTemplates();
   }
 
-  private saveTemplate(event: IpcMainEvent, template: IDocument) {
+  private saveTemplate(event: IpcMainEvent, template: IDocument): void {
      this.npAssistant.saveTemplate(template);
   }
 
-  private openFileWithExplorer(event: IpcMainEvent, filename: string) {
+  private openFileWithExplorer(event: IpcMainEvent, filename: string):void {
      this.npAssistant.openFileWithExplorer(filename);
   }
 
-  private openOutputWithExplorer(event: IpcMainEvent, folder: string) {
+  private openOutputWithExplorer(event: IpcMainEvent, folder: string):void {
      this.npAssistant.openOutputFolderWithExplorer(folder);
   }
 
-  private addFileTemplate(event: IpcMainEvent) {
+  private addFileTemplate(event: IpcMainEvent): Promise<IDocument[]> {
     return this.npAssistant.addNewFileTemplate();
   }
 
-  private exportTemplates(event: IpcMainEvent, exportFolder: string, exportFields: IMappedInput[]) {
+  private exportTemplates(event: IpcMainEvent, exportFolder: string, exportFields: IMappedInput[]): Promise<string[]> {
     return this.npAssistant.createDocuments(exportFolder, exportFields);
   }
 }

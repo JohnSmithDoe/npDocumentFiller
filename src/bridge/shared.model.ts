@@ -36,13 +36,15 @@ export interface IMappedInput {
 export type TAppDatabase = { [key: string]: IDocument };
 
 export enum EAppChannels {
-  GET             = 'get-templates',
-  REMOVE          = 'remove-template',
-  OPEN            = 'open-file',
-  OPEN_OUTPUT     = 'open-output',
-  SAVE            = 'save-templates',
-  ADD             = 'add-template',
-  EXPORT          = 'export-templates',
-  CLIENT_RESPONSE = 'client-response',
-  CLIENT_ERROR = 'client-error',
+  GET           = 'get-templates',
+  REMOVE        = 'remove-template',
+  OPEN          = 'open-file',
+  OPEN_OUTPUT   = 'open-output',
+  SAVE          = 'save-templates',
+  ADD           = 'add-template',
+  EXPORT        = 'export-templates',
+
+  FINISHED_LOAD = 'finished-loading',
+  CLIENT_UPDATE = 'client-update',
+  CLIENT_ERROR  = 'client-error',
 }

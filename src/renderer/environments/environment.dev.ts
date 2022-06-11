@@ -2,5 +2,6 @@
 
 export const APP_CONFIG = {
   production:  false,
-  environment: 'DEV'
+  environment: 'DEV',
+  testData:    null,
 };

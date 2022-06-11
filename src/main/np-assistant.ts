@@ -86,15 +86,12 @@ export class NpAssistant {
     let valid = true;
     if (!fs.existsSync(outputFolder)) {
       fs.mkdirSync(outputFolder);
-      result.push(`INFO: Ordner wurde erstellt [${foldername}].`);
+      result.push(`Ordner wurde erstellt: ${outputFolder}`);
     } else {
       valid = false;
-      result.push('*******************');
-      result.push('FEHLER: Ordner existierte bereits.');
-      result.push(`[${foldername}]`);
+      result.push(`Ordner existierte bereits: ${outputFolder}`);
       result.push('Erstellen wurde abgebrochen damit keine Daten überschrieben werden.');
       result.push('Bitte warte eine Minute, lösche den Ordner oder verwende ein anderes suffix');
-      result.push('*******************');
     }
     return {outputMsgs: result, valid};
   }
@@ -118,16 +115,14 @@ export class NpAssistant {
     return Object.values<IDocument>(this.database);
   }
 
-  saveTemplate(template: IDocument): IDocument[] {
+  saveTemplate(template: IDocument):void {
     this.database[template.filename] = template;
     NpAssistant.writeDatabase(this.database);
-    return this.getFileTemplates();
   }
 
-  removeFileTemplate(filename: string): IDocument[] {
+  removeFileTemplate(filename: string) {
     delete this.database[filename];
     NpAssistant.writeDatabase(this.database);
-    return this.getFileTemplates();
   }
 
   openFileWithExplorer(filename: string): void {
@@ -200,7 +195,6 @@ export class NpAssistant {
       }
       NpAssistant.writeDatabase(this.database);
     }
-
     return this.getFileTemplates();
   }
 
@@ -247,7 +241,7 @@ export class NpAssistant {
   async createDocuments(foldername: string, inputs: IMappedInput[]): Promise<string[]> {
     const outputFolder = path.join(outputPath, foldername);
     const {outputMsgs, valid} = NpAssistant.createAndValidateOutputFolder(outputFolder, foldername);
-    if (!valid) return outputMsgs;
+    if (!valid) throw new Error(outputMsgs.join('||'));
 
     const templates = this.getFileTemplates().filter(template => template.export);
     for (const document of templates) {
@@ -262,11 +256,12 @@ export class NpAssistant {
       } else {
         fs.copyFileSync(tmpCopy, outCopy);
       }
+      outputMsgs.push(`Dokument wurden erstellt: ${basename}`);
 
       NpAssistant.removeTempCopy(tmpCopy);
     }
 
-    outputMsgs.push(`INFO: Alle Dokumente wurden erstellt.`);
+    outputMsgs.push(`Alle Dokumente wurden erfolgreich erstellt.`);
     return outputMsgs;
   }
 

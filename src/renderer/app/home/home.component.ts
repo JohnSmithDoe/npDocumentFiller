@@ -1,8 +1,9 @@
-import {Component, OnDestroy, OnInit} from '@angular/core';
+import {Component, NgZone, OnDestroy, OnInit} from '@angular/core';
 import {MatDialog} from '@angular/material/dialog';
-import {MatSnackBar} from '@angular/material/snack-bar';
+// import {MatSnackBar} from '@angular/material/snack-bar';
+import {MessageDialogComponent} from 'app/shared/dialogs/message/message-dialog.component';
 import {Subscription} from 'rxjs';
-import {EAppChannels, IDocument, IMappedField, IMappedInput, IPdfDocument, IXlsxDocument} from '../../../bridge/shared.model';
+import {IDocument, IMappedField, IMappedInput, IPdfDocument, IXlsxDocument} from '../../../bridge/shared.model';
 import {APP_CONFIG} from '../../environments/environment';
 import {AppService} from '../services/app.service';
 import {ElectronService} from '../services/electron.service';
@@ -24,50 +25,78 @@ export class HomeComponent implements OnInit, OnDestroy {
   exportSuffix: string;
   exportFolder: string;
 
-  private snackSub: Subscription;
+  // private snackSub: Subscription;
   private dialogSub: Subscription;
   private subs: Subscription[] = [];
 
-  private exportIsRunning: boolean;
   private changedName = false;
 
   constructor(
     private readonly electronService: ElectronService,
-    private readonly snackBarService: MatSnackBar,
+    // private readonly snackBarService: MatSnackBar,
     private readonly appService: AppService,
-    private readonly dialog: MatDialog
+    private readonly dialog: MatDialog,
+    private readonly ngZone: NgZone
   ) {
     this.subs.push(
-      electronService.update$.subscribe((data) => {
-        this.appService.modal$.next(false);
-        if ((typeof data === 'boolean') || (data === undefined)) {
-          return;
-        } else if (data.length && typeof data[0] === 'string') {
-          this.exportMsgs = data as string[];
-        } else {
-          this.updateDataSource(data as IDocument[]);
-        }
-
-        if (this.exportIsRunning) {
-          this.exportIsRunning = false;
-          const snack = this.snackBarService.open('Dokumente wurden erstellt', 'Ordner öffnen', {duration: 5000});
-          if (this.snackSub && !this.snackSub.closed) {
-            this.snackSub.unsubscribe();
-          }
-          this.snackSub = snack.onAction().subscribe(() => {
-            this.electronService.openOutputFolder(this.exportFolder);
-          });
-        }
+      // on return messages from electron call
+      electronService.report$.subscribe((data: string[]) => {
+        console.log('43: report');
+        this.ngZone.runTask(() => {
+          this.dialog.open(MessageDialogComponent,
+                           {
+                             data:         {
+                               headline: 'Export war erfolgreich',
+                               msgs: data,
+                               folder: this.exportFolder
+                             },
+                             autoFocus:    'dialog',
+                             hasBackdrop:  true,
+                             restoreFocus: true
+                           });
+        });
       }),
 
+      electronService.finishedLoading$.subscribe((data: IDocument[]) => {
+        console.log('58: finish load');
+        // finished load gets initiated by the main process so we need to get it into the zone
+        this.ngZone.runTask(() => {
+          console.log('61: really finished load');
+          this.updateDataSource(data);
+        });
+      }),
+
+      electronService.update$.subscribe((data: IDocument[]) => {
+        console.log('65: update');
+        this.updateDataSource(data);
+      }),
+
+      // on start electron call
       electronService.startRequest$.subscribe((channel) => {
-        this.exportIsRunning = channel === EAppChannels.EXPORT;
+        console.log('70: start');
         this.appService.modal$.next(this.electronService.isElectron);
       }),
 
-      electronService.error$.subscribe((err) => {
+      // on end electron call
+      electronService.stopRequest$.subscribe((channel) => {
+        console.log('75: stop');
         this.appService.modal$.next(false);
-        console.error(err);
+      }),
+
+      // on error
+      electronService.error$.subscribe((err) => {
+        this.dialog.open(MessageDialogComponent,
+                         {
+                           data: {
+                             headline: 'Es ist ein Problem aufgetreten',
+                             msgs: err,
+                             folder: this.exportFolder
+                           },
+                           disableClose: true,
+                           autoFocus: 'dialog',
+                           hasBackdrop: true,
+                           panelClass: 'error-panel'
+                         });
       })
     );
   }
@@ -144,12 +173,16 @@ export class HomeComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit(): void {
-    this.electronService.getTemplates();
-    if (!this.electronService.isElectron) this.updateDataSource(APP_CONFIG.testData);
+    console.log('Init App');
+    // this.electronService.getTemplates();
+    if (!this.electronService.isElectron) {
+      this.appService.modal$.next(false);
+      this.updateDataSource(APP_CONFIG.testData);
+    }
   }
 
   ngOnDestroy() {
-    [...this.subs, this.snackSub, this.dialogSub].forEach(sub => !sub.closed && sub.unsubscribe());
+    [...this.subs, /*this.snackSub,*/ this.dialogSub].forEach(sub => !sub.closed && sub.unsubscribe());
   }
 
   updateExportFolder() {

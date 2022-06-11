@@ -7,20 +7,35 @@ import IpcRendererEvent = Electron.IpcRendererEvent;
               providedIn: 'root'
             })
 export class ElectronService {
-  // private readonly webFrame: typeof webFrame;
-  // private readonly childProcess: typeof childProcess;
-  // private readonly fs: typeof fs;
-  private readonly ipcRenderer: typeof ipcRenderer;
-  public update$: EventEmitter<IDocument[]|string[]|boolean|undefined> = new EventEmitter<IDocument[]|string[]|boolean|undefined>();
+
   public startRequest$: EventEmitter<EAppChannels> = new EventEmitter<EAppChannels>();
-  public error$: EventEmitter<any> = new EventEmitter<any>();
+  public stopRequest$: EventEmitter<EAppChannels> = new EventEmitter<EAppChannels>();
+
+  public update$: EventEmitter<IDocument[]> = new EventEmitter<IDocument[]>();
+  public finishedLoading$: EventEmitter<IDocument[] | undefined> = new EventEmitter<IDocument[] | undefined>();
+  public error$: EventEmitter<string[]> = new EventEmitter<string[]>();
+  public report$: EventEmitter<string[]> = new EventEmitter<string[]>();
+
+  private readonly ipcRenderer: typeof ipcRenderer;
 
   constructor() {
     // Conditional imports
     if (this.isElectron) {
       this.ipcRenderer = window.require('electron').ipcRenderer;
-      this.ipcRenderer.on(EAppChannels.CLIENT_RESPONSE, (event:IpcRendererEvent, templates: IDocument[]) => this.update$.emit(templates));
-      this.ipcRenderer.on(EAppChannels.CLIENT_ERROR, (event:IpcRendererEvent, err:any) => this.error$.emit(err));
+      this.ipcRenderer.on(EAppChannels.FINISHED_LOAD, (event: IpcRendererEvent, templates: IDocument[]) => {
+        this.stopRequest$.emit(EAppChannels.FINISHED_LOAD);
+        this.finishedLoading$.emit(templates);
+      });
+      this.ipcRenderer.on(EAppChannels.CLIENT_UPDATE, (event: IpcRendererEvent, data: IDocument[] | string[] | undefined) => {
+        if (data && data.length) {
+          if (typeof data[0] === 'string') {
+            this.report$.emit(data as string[]);
+          } else {
+            this.update$.emit(data as IDocument[]);
+          }
+        }
+      });
+      this.ipcRenderer.on(EAppChannels.CLIENT_ERROR, (event: IpcRendererEvent, err: any) => this.error$.emit(err));
       // this.webFrame = window.require('electron').webFrame;
       // this.childProcess = window.require('child_process');
       // this.fs = window.require('fs');
@@ -45,43 +60,47 @@ export class ElectronService {
 
   private get renderer() { return this.isElectron ? this.ipcRenderer : undefined;}
 
-  private sendASync(channel: EAppChannels, ...data: any) {
+  private send(channel: EAppChannels, ...data: any) {
     console.log('Send on channel: ', channel);
     this.startRequest$.emit(channel);
-    this.renderer?.invoke(channel, ...data).then((data) => this.update$.emit(data));
+    this.renderer?.invoke(channel, ...data).then((data) => {
+      console.log('Response on channel: ', channel, data);
+      this.stopRequest$.emit(channel);
+    });
   }
 
-  getTemplates(){
-    this.sendASync(EAppChannels.GET);
+  // this did not work ... for timing reasons... not sure... did finish load now sends the inital data
+  getTemplates() {
+    this.send(EAppChannels.GET);
   }
 
   addFileTemplate() {
-    this.sendASync(EAppChannels.ADD);
+    this.send(EAppChannels.ADD);
   }
 
   save(data: IDocument) {
-    this.sendASync(EAppChannels.SAVE, data);
+    this.send(EAppChannels.SAVE, data);
   }
 
   export(foldername: string, data: IMappedInput[]) {
-    this.sendASync(EAppChannels.EXPORT, data, foldername);
+    this.send(EAppChannels.EXPORT, data, foldername);
   }
 
   openFileWithExplorer(filename: string) {
-    this.sendASync(EAppChannels.OPEN, filename);
+    this.send(EAppChannels.OPEN, filename);
   }
 
   openOutputFolder(folder: string) {
-    this.sendASync(EAppChannels.OPEN_OUTPUT, folder);
+    this.send(EAppChannels.OPEN_OUTPUT, folder);
   }
 
   createDocuments(exportFolder: string, exportedFields: IMappedInput[]) {
-    this.sendASync(EAppChannels.EXPORT,
-                          exportFolder,
-                          exportedFields.map(({identifiers, value, ...field}) => ({identifiers, value})));
+    this.send(EAppChannels.EXPORT,
+              exportFolder,
+              exportedFields.map(({identifiers, value, ...field}) => ({identifiers, value})));
   }
 
   removeDocument(template: IDocument) {
-    this.sendASync(EAppChannels.REMOVE, template.filename);
+    this.send(EAppChannels.REMOVE, template.filename);
   }
 }

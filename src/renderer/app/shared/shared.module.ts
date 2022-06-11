@@ -16,12 +16,14 @@ import {ModalComponent} from './components/modal/modal.component';
 import {PageNotFoundComponent} from './components/page-not-found/page-not-found.component';
 import {FieldDialogComponent} from './dialogs/add-field/field-dialog.component';
 import {ConfirmDialogComponent} from './dialogs/confirm/confirm-dialog.component';
+import {MessageDialogComponent} from './dialogs/message/message-dialog.component';
 
 @NgModule({
             declarations: [
               PageNotFoundComponent,
               FieldDialogComponent,
               ConfirmDialogComponent,
+              MessageDialogComponent,
               ModalComponent
             ],
             imports: [
@@ -42,6 +44,7 @@ import {ConfirmDialogComponent} from './dialogs/confirm/confirm-dialog.component
               FormsModule,
               FieldDialogComponent,
               ConfirmDialogComponent,
+              MessageDialogComponent,
               ModalComponent
             ]
           })
