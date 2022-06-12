@@ -1,6 +1,6 @@
 {
   "name": "np-document-filler",
-  "version": "1.1.0",
+  "version": "1.1.1",
   "description": "Copy and fill xlsx and pdf documents with the same input data",
   "main": "dist/main/main.js",
   "scripts": {

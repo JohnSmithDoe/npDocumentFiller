@@ -25,7 +25,6 @@ Thankfully based on (electron v17 / angular v13 template): [maximegris/angular-e
 
 # IMPROVEMENT IDEAS
 * typing could be better
-* sorting of documents
 * save a set of export settings
 * 
 

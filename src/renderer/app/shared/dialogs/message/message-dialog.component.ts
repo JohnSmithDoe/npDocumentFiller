@@ -3,7 +3,7 @@ import {MAT_DIALOG_DATA, MatDialogRef} from '@angular/material/dialog';
 import {ElectronService} from '../../../services/electron.service';
 
 @Component({
-             selector:    'app-error-dialog',
+             selector:    'app-message-dialog',
              templateUrl: './message-dialog.component.html',
              styleUrls:   ['./message-dialog.component.scss']
            })

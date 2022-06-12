@@ -1,4 +1,3 @@
-<!--suppress TypeScriptUnresolvedVariable -->
 <main class="left">
   <mat-card>
     <h3>Vorlagen verwalten</h3>
@@ -10,7 +9,15 @@
     </mat-card-actions>
     <mat-divider></mat-divider>
 
-    <h4>Vorlagen</h4>
+    <mat-list>
+      <mat-list-item>
+        <h4>Vorlagen</h4>
+        <button mat-flat-button (click)="toggleSort()">
+          <mat-icon>swap_vert</mat-icon>
+          {{currentSort}}
+        </button>
+      </mat-list-item>
+    </mat-list>
 
     <mat-accordion multi>
       <mat-expansion-panel *ngFor="let doc of dataSource">
@@ -58,9 +65,9 @@
         </ng-container>
         <ng-container *ngIf="doc.mapped?.length === 0">
           <p class="add-alt">Bitte füge erst ein neues Feld hinzu
-          <button *ngIf="doc.type !== 'resource'" (click)="showFieldMappingDialog(doc, $event)" color="primary" mat-icon-button matTooltip="Feld hinzufügen" aria-label="Open the field mapping dialog">
-            <mat-icon class="mat-icon-rtl-mirror">add</mat-icon>
-          </button>
+            <button *ngIf="doc.type !== 'resource'" (click)="showFieldMappingDialog(doc, $event)" color="primary" mat-icon-button matTooltip="Feld hinzufügen" aria-label="Open the field mapping dialog">
+              <mat-icon class="mat-icon-rtl-mirror">add</mat-icon>
+            </button>
           </p>
         </ng-container>
       </mat-expansion-panel>

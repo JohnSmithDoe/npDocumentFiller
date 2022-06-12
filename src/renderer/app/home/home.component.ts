@@ -24,6 +24,7 @@ export class HomeComponent implements OnInit, OnDestroy {
   exportedFields: TUITemplateInput[] = [];
   exportSuffix: string;
   exportFolder: string;
+  currentSort: 'aufsteigend' | 'absteigend' = 'aufsteigend';
 
   // private snackSub: Subscription;
   private dialogSub: Subscription;
@@ -47,8 +48,8 @@ export class HomeComponent implements OnInit, OnDestroy {
                            {
                              data:         {
                                headline: 'Export war erfolgreich',
-                               msgs: data,
-                               folder: this.exportFolder
+                               msgs:     data,
+                               folder:   this.exportFolder
                              },
                              autoFocus:    'dialog',
                              hasBackdrop:  true,
@@ -87,15 +88,15 @@ export class HomeComponent implements OnInit, OnDestroy {
       electronService.error$.subscribe((err) => {
         this.dialog.open(MessageDialogComponent,
                          {
-                           data: {
+                           data:         {
                              headline: 'Es ist ein Problem aufgetreten',
-                             msgs: err,
-                             folder: this.exportFolder
+                             msgs:     err,
+                             folder:   this.exportFolder
                            },
                            disableClose: true,
-                           autoFocus: 'dialog',
-                           hasBackdrop: true,
-                           panelClass: 'error-panel'
+                           autoFocus:    'dialog',
+                           hasBackdrop:  true,
+                           panelClass:   'error-panel'
                          });
       })
     );
@@ -104,6 +105,7 @@ export class HomeComponent implements OnInit, OnDestroy {
   private updateDataSource(newData: IDocument[]) {
     this.dataSource = newData;
     if (this.dataSource?.length) {
+      this.sortDocuments();
       this.updateExportedFields();
     }
   }
@@ -161,6 +163,7 @@ export class HomeComponent implements OnInit, OnDestroy {
   }
 
   // use confirm dialog
+
   private removeField(field: IMappedField) {
     if (this.dataSource) {
       const document =
@@ -275,5 +278,18 @@ export class HomeComponent implements OnInit, OnDestroy {
   showDocument(node: IDocument, $event: MouseEvent) {
     $event.stopPropagation(); // dont trigger the expandable panel
     this.electronService.openFileWithExplorer(node.filename);
+  }
+
+  toggleSort() {
+    if (this.currentSort === 'aufsteigend') {
+      this.currentSort = 'absteigend';
+    } else {
+      this.currentSort = 'aufsteigend';
+    }
+    this.sortDocuments();
+  }
+
+  private sortDocuments() {
+    this.dataSource.sort((a, b) => this.currentSort === 'aufsteigend' ? a.name.localeCompare(b.name) : b.name.localeCompare(a.name));
   }
 }
