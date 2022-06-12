@@ -1,6 +1,7 @@
 import {CommonModule} from '@angular/common';
 import {NgModule} from '@angular/core';
 import {FormsModule} from '@angular/forms';
+import {MatAutocompleteModule} from '@angular/material/autocomplete';
 import {MatButtonModule} from '@angular/material/button';
 import {MatCheckboxModule} from '@angular/material/checkbox';
 import {MatDialogModule} from '@angular/material/dialog';
@@ -39,6 +40,7 @@ import {MessageDialogComponent} from './dialogs/message/message-dialog.component
               MatTreeModule,
               MatIconModule,
               MatGridListModule,
+              MatAutocompleteModule,
             ],
             exports:      [
               FormsModule,

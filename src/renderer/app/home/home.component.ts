@@ -1,9 +1,10 @@
+import {I18N_ICU_MAPPING_PREFIX} from '@angular/compiler/src/render3/view/i18n/util';
 import {Component, NgZone, OnDestroy, OnInit} from '@angular/core';
 import {MatDialog} from '@angular/material/dialog';
 // import {MatSnackBar} from '@angular/material/snack-bar';
 import {MessageDialogComponent} from 'app/shared/dialogs/message/message-dialog.component';
 import {Subscription} from 'rxjs';
-import {IDocument, IMappedField, IMappedInput, IPdfDocument, IXlsxDocument} from '../../../bridge/shared.model';
+import {IDocument, IMappedDocument, IMappedField, IMappedInput, IPdfDocument, IXlsxDocument} from '../../../bridge/shared.model';
 import {APP_CONFIG} from '../../environments/environment';
 import {AppService} from '../services/app.service';
 import {ElectronService} from '../services/electron.service';
@@ -25,6 +26,18 @@ export class HomeComponent implements OnInit, OnDestroy {
   exportSuffix: string;
   exportFolder: string;
   currentSort: 'aufsteigend' | 'absteigend' = 'aufsteigend';
+
+  profileId = '';
+  profiles: { id: string, name: string }[] = [{
+    id:   'p1',
+    name: 'P1'
+  }, {
+    id:   'p2',
+    name: 'P2'
+  }, {
+    id:   'p3',
+    name: 'P3'
+  }];
 
   // private snackSub: Subscription;
   private dialogSub: Subscription;
@@ -163,11 +176,10 @@ export class HomeComponent implements OnInit, OnDestroy {
   }
 
   // use confirm dialog
-
   private removeField(field: IMappedField) {
     if (this.dataSource) {
       const document =
-              (this.dataSource.filter(template => template.type !== 'resource') as (IXlsxDocument | IPdfDocument)[])
+              (this.dataSource.filter(template => template.type !== 'resource') as (IMappedDocument)[])
                 .find(template => template.mapped.find(tfield => tfield.origId === field.origId));
       document.mapped.splice(document.mapped.indexOf(field), 1);
       this.electronService.save(document);
@@ -244,7 +256,8 @@ export class HomeComponent implements OnInit, OnDestroy {
   showFieldMappingDialog(node: IXlsxDocument | IPdfDocument | any, $event: MouseEvent) {
     $event.stopPropagation(); // dont trigger the expandable panel
     const possibleFields = node.type === 'pdf' ? node.fields : node.sheets;
-    const dialogRef = this.dialog.open(FieldDialogComponent, {data: {possibleFields, used: node.mapped, type: node.type}});
+    const fieldNames: string[] = this.dataSource.flatMap((docu) => ((docu as IMappedDocument).mapped || []).map(field => field.clearName));
+    const dialogRef = this.dialog.open(FieldDialogComponent, {data: {possibleFields, used: node.mapped, type: node.type, fieldNames}});
 
     if (this.dialogSub && !this.dialogSub.closed) {
       this.dialogSub.unsubscribe();
@@ -291,5 +304,28 @@ export class HomeComponent implements OnInit, OnDestroy {
 
   private sortDocuments() {
     this.dataSource.sort((a, b) => this.currentSort === 'aufsteigend' ? a.name.localeCompare(b.name) : b.name.localeCompare(a.name));
+  }
+
+  changedProfile($event: any) {
+    console.log($event);
+    this.dataSource.forEach(document => {
+      document.export = !document.export;
+      (document as IMappedDocument).mapped?.forEach(field => field.export = true);
+    });
+    this.updateExportedFields();
+  }
+
+  saveProfile() {
+    this.electronService.saveProfile(this.profiles);
+  }
+
+  deleteProfile() {
+    this.profiles.splice(this.profiles.findIndex(profile => profile.id === this.profileId), 1);
+    this.profileId = '';
+    this.electronService.saveProfile(this.profiles);
+  }
+
+  addProfile() {
+
   }
 }

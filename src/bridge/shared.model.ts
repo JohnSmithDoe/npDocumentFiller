@@ -9,14 +9,16 @@ export interface IDocument<T = TTemplateType> {
   type: T;
 }
 
-export interface IXlsxDocument extends IDocument<'xlsx'> {
-  sheets: { id: string, name:string }[];
+export interface IMappedDocument<T = 'pdf'| 'xlsx'> extends IDocument<T>{
   mapped: IMappedField[];
 }
 
-export interface IPdfDocument extends IDocument<'pdf'> {
+export interface IXlsxDocument extends IMappedDocument<'xlsx'> {
+  sheets: { id: string, name:string }[];
+}
+
+export interface IPdfDocument extends IMappedDocument<'pdf'> {
   fields: { id: string, name:string }[];
-  mapped: IMappedField[];
   previewfile: string;
 }
 

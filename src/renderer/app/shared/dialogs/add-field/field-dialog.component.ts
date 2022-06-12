@@ -1,5 +1,8 @@
 import {Component, Inject, OnInit} from '@angular/core';
+import {FormControl} from '@angular/forms';
 import {MAT_DIALOG_DATA, MatDialogRef} from '@angular/material/dialog';
+import {Observable} from 'rxjs';
+import {map, startWith} from 'rxjs/operators';
 import {IMappedField} from '../../../../../bridge/shared.model';
 
 @Component({
@@ -14,16 +17,31 @@ export class FieldDialogComponent implements OnInit {
     column: '',
     row:    undefined,
   };
+  fieldNameControl = new FormControl('');
+  filteredNames$: Observable<string[]>;
 
   constructor(
     public dialogRef: MatDialogRef<FieldDialogComponent>,
-    @Inject(MAT_DIALOG_DATA) public data: { type: 'pdf' | 'xlsx', possibleFields: { id: string, name: string, disabled: boolean }[], used: IMappedField[] },
+    @Inject(MAT_DIALOG_DATA) public data: {
+      type: 'pdf' | 'xlsx',
+      possibleFields: { id: string, name: string, disabled: boolean }[],
+      used: IMappedField[],
+      fieldNames: string[]
+    },
   ) { }
 
   ngOnInit(): void {
     this.data.possibleFields.forEach(field => {
       field.disabled = !!this.data.used.find(item=> item.origId === field.id);
     })
+    this.filteredNames$ = this.fieldNameControl.valueChanges.pipe(
+      startWith(''),
+      map(name => (name ? this.filter(name) : this.data.fieldNames.slice())),
+    );
+  }
+  private filter(name: string): string[] {
+    const filterValue = name.toLowerCase();
+    return this.data.fieldNames.filter(field => field.toLowerCase().includes(filterValue));
   }
 
   createMappedField() {
@@ -65,5 +83,9 @@ export class FieldDialogComponent implements OnInit {
     if(!this.data || !this.current.id || !this.current.name.length) return false;
     if(this.data.type === 'pdf') return true;
     return !this.isDuplicated();
+  }
+
+  updateFilter($event: any) {
+    this.fieldNameControl.setValue($event);
   }
 }

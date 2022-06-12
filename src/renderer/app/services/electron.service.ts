@@ -103,4 +103,8 @@ export class ElectronService {
   removeDocument(template: IDocument) {
     this.send(EAppChannels.REMOVE, template.filename);
   }
+
+  saveProfile(profiles: { id: string; name: string }[]) {
+    console.log('saving profiles', profiles);
+  }
 }
