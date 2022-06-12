@@ -16,6 +16,7 @@ import {ModalComponent} from './components/modal/modal.component';
 
 import {PageNotFoundComponent} from './components/page-not-found/page-not-found.component';
 import {FieldDialogComponent} from './dialogs/add-field/field-dialog.component';
+import {AddProfileDialogComponent} from './dialogs/add-profile/add-profile-dialog.component';
 import {ConfirmDialogComponent} from './dialogs/confirm/confirm-dialog.component';
 import {MessageDialogComponent} from './dialogs/message/message-dialog.component';
 
@@ -25,6 +26,7 @@ import {MessageDialogComponent} from './dialogs/message/message-dialog.component
               FieldDialogComponent,
               ConfirmDialogComponent,
               MessageDialogComponent,
+              AddProfileDialogComponent,
               ModalComponent
             ],
             imports: [
@@ -47,6 +49,7 @@ import {MessageDialogComponent} from './dialogs/message/message-dialog.component
               FieldDialogComponent,
               ConfirmDialogComponent,
               MessageDialogComponent,
+              AddProfileDialogComponent,
               ModalComponent
             ]
           })

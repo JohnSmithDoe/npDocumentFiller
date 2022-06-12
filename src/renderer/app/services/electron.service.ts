@@ -1,6 +1,6 @@
 import {EventEmitter, Injectable} from '@angular/core';
 import {ipcRenderer} from 'electron';
-import {EAppChannels, IInitialData, IMappedDocument, IMappedInput} from '../../../bridge/shared.model';
+import {EAppChannels, IInitialData, IMappedDocument, IMappedInput, IProfile} from '../../../bridge/shared.model';
 import IpcRendererEvent = Electron.IpcRendererEvent;
 
 @Injectable({
@@ -104,8 +104,11 @@ export class ElectronService {
     this.send(EAppChannels.REMOVE, template.filename);
   }
 
-  saveProfile(profiles: { id: string; name: string }[]) {
-    console.log('saving profiles', profiles);
+  saveProfile(profiles: IProfile[]) {
+    this.send(EAppChannels.SAVE_PROFILES, profiles);
   }
 
+  remapFileTemplate(doc: IMappedDocument) {
+    this.send(EAppChannels.REMAP, doc.filename);
+  }
 }

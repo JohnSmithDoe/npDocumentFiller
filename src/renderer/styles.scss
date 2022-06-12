@@ -29,3 +29,6 @@ $color-green: mat.get-color-from-palette(mat.$green-palette, 600);
     color: red;
   }
 }
+.toolbar-spacer {
+  flex: 1 1 auto;
+}

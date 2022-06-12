@@ -40,11 +40,14 @@ export type TAppDatabase = { [key: string]: IMappedDocument };
 
 export enum EAppChannels {
   GET           = 'get-templates',
+  GET_PROFILES  = 'get-profiles',
   REMOVE        = 'remove-template',
   OPEN          = 'open-file',
   OPEN_OUTPUT   = 'open-output',
   SAVE          = 'save-templates',
+  SAVE_PROFILES = 'save-profiles',
   ADD           = 'add-template',
+  REMAP         = 'remap-template',
   EXPORT        = 'export-templates',
 
   FINISHED_LOAD = 'finished-loading',

@@ -19,7 +19,7 @@ function createWindow(): void {
                             autoHideMenuBar: true,
                             width:           1024,
                             height:          800,
-                            backgroundColor: '#dedede',
+                            backgroundColor: '#fafafa',
                             center:          true,
                             webPreferences:  {
                               nodeIntegration:             true,
@@ -64,7 +64,7 @@ function createWindow(): void {
   });
   win.webContents.on('did-finish-load', (event,errorCode, errorDesc, validatedURL, isMain) => {
     if(assistant){
-      const initialData: IInitialData = {documents: assistant.getFileTemplates(), profiles: assistant.getProfiles()}
+      const initialData: IInitialData = {documents: assistant.documents, profiles: assistant.profiles}
       event.sender.send(EAppChannels.FINISHED_LOAD, initialData);
     }
   });

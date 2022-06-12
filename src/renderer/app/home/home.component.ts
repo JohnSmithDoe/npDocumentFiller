@@ -3,11 +3,12 @@ import {MatDialog} from '@angular/material/dialog';
 // import {MatSnackBar} from '@angular/material/snack-bar';
 import {MessageDialogComponent} from 'app/shared/dialogs/message/message-dialog.component';
 import {Subscription} from 'rxjs';
-import {IInitialData, IMappedDocument, IMappedField, IMappedInput, IPdfDocument, IProfile, IXlsxDocument} from '../../../bridge/shared.model';
+import {IInitialData, IMappedDocument, IMappedField, IMappedInput, IPdfDocument, IProfile, IXlsxDocument, TTemplateType} from '../../../bridge/shared.model';
 import {APP_CONFIG} from '../../environments/environment';
 import {AppService} from '../services/app.service';
 import {ElectronService} from '../services/electron.service';
 import {FieldDialogComponent} from '../shared/dialogs/add-field/field-dialog.component';
+import {AddProfileDialogComponent} from '../shared/dialogs/add-profile/add-profile-dialog.component';
 import {ConfirmDialogComponent} from '../shared/dialogs/confirm/confirm-dialog.component';
 
 type TUITemplateInput = IMappedInput & IMappedField & { info: string };
@@ -27,7 +28,7 @@ export class HomeComponent implements OnInit, OnDestroy {
   currentSort: 'aufsteigend' | 'absteigend' = 'aufsteigend';
 
   profileId = '';
-  profiles: IProfile[];
+  profiles: IProfile[] = [];
 
   // private snackSub: Subscription;
   private dialogSub: Subscription;
@@ -67,7 +68,7 @@ export class HomeComponent implements OnInit, OnDestroy {
         this.ngZone.runTask(() => {
           console.log('61: really finished load');
           this.updateDataSource(data.documents);
-          this.profiles = data.profiles;
+          this.profiles = data.profiles || [];
         });
       }),
 
@@ -125,7 +126,7 @@ export class HomeComponent implements OnInit, OnDestroy {
   private updateExportedFields() {
     const mappedFields = this.dataSource
                              .filter(document => document.export)
-                             .flatMap(document =>  document.mapped || [])
+                             .flatMap(document => document.mapped || [])
                              .filter(field => field.export);
 
 
@@ -178,6 +179,7 @@ export class HomeComponent implements OnInit, OnDestroy {
     // this.electronService.getTemplates();
     if (!this.electronService.isElectron) {
       this.appService.modal$.next(false);
+      this.profiles = [{id: 'p1', name: 'P1', documentIds: [], fieldIds: []},{id: 'p2', name: 'P2', documentIds: [], fieldIds: []}];
       this.updateDataSource(APP_CONFIG.testData);
     }
   }
@@ -202,6 +204,11 @@ export class HomeComponent implements OnInit, OnDestroy {
     this.electronService.addFileTemplate();
   }
 
+  remapDocument(doc: IMappedDocument, $event: MouseEvent) {
+    $event.stopPropagation(); // do not toggle accordion
+    this.electronService.remapFileTemplate(doc);
+  }
+
   createDocuments() {
     this.updateExportFolder();
     this.electronService.createDocuments(this.exportFolder, this.exportedFields);
@@ -222,9 +229,10 @@ export class HomeComponent implements OnInit, OnDestroy {
     this.updateExportedFields();
   }
 
-  showConfirmDialog(document: IMappedDocument, field: IMappedField, $event: MouseEvent) {
+  showConfirmDialog(document: IMappedDocument, field: IMappedField, profile:string, $event: MouseEvent,) {
     $event.stopPropagation(); // dont trigger the expandable panel
-    const dialogRef = this.dialog.open(ConfirmDialogComponent, {data: !!document});
+    const type = !!document ? 'Dokument' : !!field ? 'Feld' : 'Export Profil';
+    const dialogRef = this.dialog.open(ConfirmDialogComponent, {data: type});
     if (this.dialogSub && !this.dialogSub.closed) {
       this.dialogSub.unsubscribe();
     }
@@ -232,8 +240,10 @@ export class HomeComponent implements OnInit, OnDestroy {
       if (result) {
         if (field) {
           this.removeField(field);
-        } else {
+        } else if (document) {
           this.removeDocument(document);
+        } else if (profile) {
+          this.removeProfile();
         }
       }
     });
@@ -292,26 +302,48 @@ export class HomeComponent implements OnInit, OnDestroy {
     this.dataSource.sort((a, b) => this.currentSort === 'aufsteigend' ? a.name.localeCompare(b.name) : b.name.localeCompare(a.name));
   }
 
-  changedProfile($event: any) {
-    console.log($event);
+  changedProfile() {
+    const current = this.profiles.find(profile => profile.id === this.profileId);
     this.dataSource.forEach(document => {
-      document.export = !document.export;
-      document.mapped?.forEach(field => field.export = true);
+      document.export = current.documentIds.includes(document.id);
+      document.mapped?.forEach(field => field.export = current.fieldIds.includes(field.origId));
     });
     this.updateExportedFields();
   }
 
   saveProfile() {
+    const current = this.profiles.find(profile => profile.id === this.profileId);
+    current.documentIds = this.dataSource.filter(docu => docu.export).map(docu => docu.id);
+    current.fieldIds = this.dataSource
+                           .flatMap(docu => docu.mapped || [])
+                           .filter(field => field.export)
+                           .map(field => field.origId);
     this.electronService.saveProfile(this.profiles);
   }
 
-  deleteProfile() {
+  // use confirm dialog
+  private removeProfile() {
     this.profiles.splice(this.profiles.findIndex(profile => profile.id === this.profileId), 1);
     this.profileId = '';
     this.electronService.saveProfile(this.profiles);
   }
 
   addProfile() {
+    const dialogRef = this.dialog.open(AddProfileDialogComponent, {   autoFocus:    'dialog',
+      hasBackdrop:  true,
+      restoreFocus: true});
 
+    if (this.dialogSub && !this.dialogSub.closed) {
+      this.dialogSub.unsubscribe();
+    }
+    this.dialogSub = dialogRef.afterClosed().subscribe((result: string) => {
+      if (result) {
+        this.profileId = `${Date.now()}`
+        this.profiles.push({id: this.profileId, name: result, fieldIds: [], documentIds: []});
+        this.saveProfile();
+      }
+    });
   }
+
+
 }

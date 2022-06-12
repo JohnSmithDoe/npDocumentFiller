@@ -4,41 +4,37 @@
 $color-reddish: mat.get-color-from-palette(mat.$orange-palette, 300);
 
 :host {
-  display: grid;
-  grid-template-columns: minmax(auto, 50%) minmax(50%, auto);
-  grid-template-rows: auto 1fr auto;
-  grid-gap: .5rem;
-  grid-template-areas: 'header-left header-right' 'content-left content-right' 'footer footer';
-  padding: .5rem .5rem 0 .5rem;
-  height: calc(100vh - .5rem);
-
-  @media (max-width: 691px) {
-    grid-template-columns: 1fr;
-    grid-template-areas: 'header-left' 'content-left' 'header-right' 'content-right' 'footer';
-    grid-template-rows: auto;
-
-  }
-
-  header {
-    &.left {
-      grid-area: header-left;
-    }
-
-    &.right {
-      grid-area: header-right;
-    }
+  display: flex;
+  flex-direction: row;
+  width: 100%;
+  @media (max-width: 945px) {
+    flex-direction: column;
   }
 
   main {
     display: flex;
     position: relative;
+    flex-direction: column;
+    width: 50%;
+    overflow: hidden;
+    padding: 1rem;
 
     &.left {
       grid-area: content-left;
+      mat-accordion {
+        margin-top: 1rem;
+      }
     }
 
     &.right {
       grid-area: content-right;
+      mat-form-field {
+       width: 100%;
+      }
+    }
+
+    @media (max-width: 945px) {
+      width: 100%
     }
   }
 
@@ -52,9 +48,6 @@ $color-reddish: mat.get-color-from-palette(mat.$orange-palette, 300);
     justify-content: flex-end;
   }
 
-  mat-card-actions {
-    min-height: 40px;
-  }
 
   mat-card {
     flex: 1;
@@ -88,6 +81,7 @@ $color-reddish: mat.get-color-from-palette(mat.$orange-palette, 300);
       background: #efeaf5;
       padding: 0 .5rem;
     }
+
     .no-add {
       margin: 0;
       background: #efeaf5;
@@ -100,6 +94,12 @@ $color-reddish: mat.get-color-from-palette(mat.$orange-palette, 300);
       height: auto;
     }
   }
-
+  .suffix-input{
+    font-size: 1rem;
+    max-width: 210px;
+    border: 1px solid lightgray;
+    border-radius: 4px;
+    padding: .5rem;
+  }
 
 }

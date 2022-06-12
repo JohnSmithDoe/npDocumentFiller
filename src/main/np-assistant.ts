@@ -13,7 +13,8 @@ const dataPath = process.env.APP_DATA || path.resolve('./data');
 const tmpPath = process.env.APP_TEMP || path.join(dataPath, 'tmp');
 const cachePath = process.env.APP_CACHE || path.join(dataPath, 'cache');
 const outputPath = process.env.APP_OUTPUT || path.join(dataPath, 'out');
-const configFile = process.env.APP_CONFIG || path.join(dataPath, 'config.json');
+const dataFile = process.env.APP_CONFIG || path.join(dataPath, 'data.db');
+const profileFile = process.env.APP_CONFIG || path.join(dataPath, 'profiles.db');
 
 export class NpAssistant {
 
@@ -28,8 +29,8 @@ export class NpAssistant {
   }
 
   private static readDatabase() {
-    if (fs.existsSync(configFile)) {
-      const content = fs.readFileSync(configFile, {encoding: 'utf8'});
+    if (fs.existsSync(dataFile)) {
+      const content = fs.readFileSync(dataFile, {encoding: 'utf8'});
       return JSON.parse(content);
     } else {
       if (!fs.existsSync(dataPath)) {
@@ -44,7 +45,23 @@ export class NpAssistant {
 
   private static writeDatabase(database: TAppDatabase) {
     try {
-      fs.writeFileSync(configFile, JSON.stringify(database), {encoding: 'utf8'});
+      fs.writeFileSync(dataFile, JSON.stringify(database), {encoding: 'utf8'});
+    } catch (e) {
+      console.error(e);
+    }
+  }
+
+  private static readProfiles(): IProfile[] {
+    if (fs.existsSync(profileFile)) {
+      const content = fs.readFileSync(profileFile, {encoding: 'utf8'});
+      return JSON.parse(content);
+    }
+    return [];
+  }
+
+  private static writeProfiles(profiles: IProfile[]){
+    try {
+      fs.writeFileSync(profileFile, JSON.stringify(profiles), {encoding: 'utf8'});
     } catch (e) {
       console.error(e);
     }
@@ -111,7 +128,7 @@ export class NpAssistant {
     return tmpCopy;
   }
 
-  getFileTemplates(): IMappedDocument[] {
+  get documents(): IMappedDocument[] {
     return Object.values<IMappedDocument>(this.database);
   }
 
@@ -195,7 +212,7 @@ export class NpAssistant {
       }
       NpAssistant.writeDatabase(this.database);
     }
-    return this.getFileTemplates();
+    return this.documents;
   }
 
   // noinspection JSMethodCanBeStatic
@@ -243,7 +260,7 @@ export class NpAssistant {
     const {outputMsgs, valid} = NpAssistant.createAndValidateOutputFolder(outputFolder, foldername);
     if (!valid) throw new Error(outputMsgs.join('||'));
 
-    const templates = this.getFileTemplates().filter(template => template.export);
+    const templates = this.documents.filter(template => template.export);
     for (const document of templates) {
       const tmpCopy = NpAssistant.copyAndValidateOriginal(document, this.database, outputMsgs);
       const basename = path.basename(document.filename);
@@ -265,7 +282,10 @@ export class NpAssistant {
     return outputMsgs;
   }
 
-  getProfiles(): IProfile[] {
-    return [{id: 'p1', name: 'P1', documentIds: [], fieldIds: []}];
+  get profiles() {
+    return NpAssistant.readProfiles();
+  }
+  set profiles(profiles){
+    NpAssistant.writeProfiles(profiles);
   }
 }
