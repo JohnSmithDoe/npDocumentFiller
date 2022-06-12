@@ -3,7 +3,7 @@ import * as ExcelJS from 'exceljs';
 import * as fs from 'fs';
 import * as path from 'path';
 import {v4 as uuidv4} from 'uuid';
-import {IDocument, IMappedField, IMappedInput, IPdfDocument, IXlsxDocument, TAppDatabase, TTemplateType} from '../bridge/shared.model';
+import {IMappedDocument, IMappedField, IMappedInput, IPdfDocument, IProfile, IXlsxDocument, TAppDatabase, TTemplateType} from '../bridge/shared.model';
 import {ApiController} from './api';
 import {PdfService} from './pdf/pdf.service';
 import {showFilePickerSync} from './utils/electron.utils';
@@ -96,7 +96,7 @@ export class NpAssistant {
     return {outputMsgs: result, valid};
   }
 
-  private static copyAndValidateOriginal(document: IDocument, database: TAppDatabase, result: string[]) {
+  private static copyAndValidateOriginal(document: IMappedDocument, database: TAppDatabase, result: string[]) {
     const tmpCopy = NpAssistant.copyToTempFolder(document.filename);
     const {mtimeMs} = fs.statSync(document.filename);
     if (document.mtime !== mtimeMs) {
@@ -111,11 +111,11 @@ export class NpAssistant {
     return tmpCopy;
   }
 
-  getFileTemplates(): IDocument[] {
-    return Object.values<IDocument>(this.database);
+  getFileTemplates(): IMappedDocument[] {
+    return Object.values<IMappedDocument>(this.database);
   }
 
-  saveTemplate(template: IDocument):void {
+  saveTemplate(template: IMappedDocument): void {
     this.database[template.filename] = template;
     NpAssistant.writeDatabase(this.database);
   }
@@ -175,7 +175,7 @@ export class NpAssistant {
     startWithExpolorer(previewfile);
   }
 
-  async addNewFileTemplate(): Promise<IDocument[]> {
+  async addNewFileTemplate(): Promise<IMappedDocument[]> {
     const filename = showFilePickerSync(this.mainWindow, {
       defaultPath: '', title: 'Dokument verknüpfen', filters: [
         {name: 'Alle Dokumente', extensions: ['*']},
@@ -265,4 +265,7 @@ export class NpAssistant {
     return outputMsgs;
   }
 
+  getProfiles(): IProfile[] {
+    return [{id: 'p1', name: 'P1', documentIds: [], fieldIds: []}];
+  }
 }

@@ -4,7 +4,7 @@ import {app, BrowserWindow} from 'electron';
 import * as fs from 'fs';
 import * as path from 'path';
 import * as url from 'url';
-import {EAppChannels} from '../bridge/shared.model';
+import {EAppChannels, IInitialData} from '../bridge/shared.model';
 import {NpAssistant} from './np-assistant';
 
 let win: BrowserWindow = null;
@@ -64,7 +64,8 @@ function createWindow(): void {
   });
   win.webContents.on('did-finish-load', (event,errorCode, errorDesc, validatedURL, isMain) => {
     if(assistant){
-      event.sender.send(EAppChannels.FINISHED_LOAD, assistant.getFileTemplates());
+      const initialData: IInitialData = {documents: assistant.getFileTemplates(), profiles: assistant.getProfiles()}
+      event.sender.send(EAppChannels.FINISHED_LOAD, initialData);
     }
   });
   assistant = new NpAssistant(win);

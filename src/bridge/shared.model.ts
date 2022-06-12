@@ -1,6 +1,6 @@
 export type TTemplateType = 'pdf' | 'xlsx' | 'resource';
 
-export interface IDocument<T = TTemplateType> {
+interface IDocument<T = TTemplateType> {
   id: string;
   name: string;
   filename: string;
@@ -9,16 +9,16 @@ export interface IDocument<T = TTemplateType> {
   type: T;
 }
 
-export interface IMappedDocument<T = 'pdf'| 'xlsx'> extends IDocument<T>{
-  mapped: IMappedField[];
+export interface IMappedDocument<T = TTemplateType> extends IDocument<T> {
+  mapped?: IMappedField[];
 }
 
 export interface IXlsxDocument extends IMappedDocument<'xlsx'> {
-  sheets: { id: string, name:string }[];
+  sheets: { id: string, name: string }[];
 }
 
 export interface IPdfDocument extends IMappedDocument<'pdf'> {
-  fields: { id: string, name:string }[];
+  fields: { id: string, name: string }[];
   previewfile: string;
 }
 
@@ -29,13 +29,14 @@ export interface IMappedField {
   export?: boolean;
 
 }
+
 export interface IMappedInput {
   identifiers: string[];
   value: string;
 }
 
 
-export type TAppDatabase = { [key: string]: IDocument };
+export type TAppDatabase = { [key: string]: IMappedDocument };
 
 export enum EAppChannels {
   GET           = 'get-templates',
@@ -49,4 +50,16 @@ export enum EAppChannels {
   FINISHED_LOAD = 'finished-loading',
   CLIENT_UPDATE = 'client-update',
   CLIENT_ERROR  = 'client-error',
+}
+
+export interface IProfile {
+  id: string;
+  name: string;
+  documentIds: string [];
+  fieldIds: string [];
+}
+
+export interface IInitialData {
+  documents: IMappedDocument[];
+  profiles: IProfile[];
 }

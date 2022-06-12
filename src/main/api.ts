@@ -1,5 +1,5 @@
 import {ipcMain, IpcMainEvent} from 'electron';
-import {EAppChannels, IDocument, IMappedInput} from '../bridge/shared.model';
+import {EAppChannels, IMappedDocument, IMappedInput} from '../bridge/shared.model';
 import {NpAssistant} from './np-assistant';
 
 type TApiDescription = {
@@ -13,7 +13,7 @@ export class ApiController {
     [EAppChannels.REMOVE]:      (event: IpcMainEvent, filename: string) => this.removeFileTemplate(event, filename),
     [EAppChannels.OPEN]:        (event: IpcMainEvent, filename: string) => this.openFileWithExplorer(event, filename),
     [EAppChannels.OPEN_OUTPUT]: (event: IpcMainEvent, folder: string) => this.openOutputWithExplorer(event, folder),
-    [EAppChannels.SAVE]:        (event: IpcMainEvent, template: IDocument) => this.saveTemplate(event, template),
+    [EAppChannels.SAVE]:        (event: IpcMainEvent, template: IMappedDocument) => this.saveTemplate(event, template),
     [EAppChannels.ADD]:         (event: IpcMainEvent, arg) => this.addFileTemplate(event),
     [EAppChannels.EXPORT]:      (event: IpcMainEvent, exportFolder: string, exportFields: IMappedInput[]) => this.exportTemplates(event, exportFolder, exportFields),
   };
@@ -38,11 +38,11 @@ export class ApiController {
      this.npAssistant.removeFileTemplate(filename);
   }
 
-  private getFileTemplates(event: IpcMainEvent): IDocument[] {
+  private getFileTemplates(event: IpcMainEvent): IMappedDocument[] {
     return this.npAssistant.getFileTemplates();
   }
 
-  private saveTemplate(event: IpcMainEvent, template: IDocument): void {
+  private saveTemplate(event: IpcMainEvent, template: IMappedDocument): void {
      this.npAssistant.saveTemplate(template);
   }
 
@@ -54,7 +54,7 @@ export class ApiController {
      this.npAssistant.openOutputFolderWithExplorer(folder);
   }
 
-  private addFileTemplate(event: IpcMainEvent): Promise<IDocument[]> {
+  private addFileTemplate(event: IpcMainEvent): Promise<IMappedDocument[]> {
     return this.npAssistant.addNewFileTemplate();
   }
 

@@ -1,6 +1,6 @@
 import {EventEmitter, Injectable} from '@angular/core';
 import {ipcRenderer} from 'electron';
-import {EAppChannels, IDocument, IMappedInput} from '../../../bridge/shared.model';
+import {EAppChannels, IInitialData, IMappedDocument, IMappedInput} from '../../../bridge/shared.model';
 import IpcRendererEvent = Electron.IpcRendererEvent;
 
 @Injectable({
@@ -11,8 +11,8 @@ export class ElectronService {
   public startRequest$: EventEmitter<EAppChannels> = new EventEmitter<EAppChannels>();
   public stopRequest$: EventEmitter<EAppChannels> = new EventEmitter<EAppChannels>();
 
-  public update$: EventEmitter<IDocument[]> = new EventEmitter<IDocument[]>();
-  public finishedLoading$: EventEmitter<IDocument[] | undefined> = new EventEmitter<IDocument[] | undefined>();
+  public update$: EventEmitter<IMappedDocument[]> = new EventEmitter<IMappedDocument[]>();
+  public finishedLoading$: EventEmitter<IInitialData | undefined> = new EventEmitter<IInitialData | undefined>();
   public error$: EventEmitter<string[]> = new EventEmitter<string[]>();
   public report$: EventEmitter<string[]> = new EventEmitter<string[]>();
 
@@ -22,16 +22,16 @@ export class ElectronService {
     // Conditional imports
     if (this.isElectron) {
       this.ipcRenderer = window.require('electron').ipcRenderer;
-      this.ipcRenderer.on(EAppChannels.FINISHED_LOAD, (event: IpcRendererEvent, templates: IDocument[]) => {
+      this.ipcRenderer.on(EAppChannels.FINISHED_LOAD, (event: IpcRendererEvent, data: IInitialData) => {
         this.stopRequest$.emit(EAppChannels.FINISHED_LOAD);
-        this.finishedLoading$.emit(templates);
+        this.finishedLoading$.emit(data);
       });
-      this.ipcRenderer.on(EAppChannels.CLIENT_UPDATE, (event: IpcRendererEvent, data: IDocument[] | string[] | undefined) => {
+      this.ipcRenderer.on(EAppChannels.CLIENT_UPDATE, (event: IpcRendererEvent, data: IMappedDocument[] | string[] | undefined) => {
         if (data && data.length) {
           if (typeof data[0] === 'string') {
             this.report$.emit(data as string[]);
           } else {
-            this.update$.emit(data as IDocument[]);
+            this.update$.emit(data as IMappedDocument[]);
           }
         }
       });
@@ -78,7 +78,7 @@ export class ElectronService {
     this.send(EAppChannels.ADD);
   }
 
-  save(data: IDocument) {
+  save(data: IMappedDocument) {
     this.send(EAppChannels.SAVE, data);
   }
 
@@ -100,11 +100,12 @@ export class ElectronService {
               exportedFields.map(({identifiers, value, ...field}) => ({identifiers, value})));
   }
 
-  removeDocument(template: IDocument) {
+  removeDocument(template: IMappedDocument) {
     this.send(EAppChannels.REMOVE, template.filename);
   }
 
   saveProfile(profiles: { id: string; name: string }[]) {
     console.log('saving profiles', profiles);
   }
+
 }

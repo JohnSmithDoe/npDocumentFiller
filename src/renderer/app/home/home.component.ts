@@ -1,10 +1,9 @@
-import {I18N_ICU_MAPPING_PREFIX} from '@angular/compiler/src/render3/view/i18n/util';
 import {Component, NgZone, OnDestroy, OnInit} from '@angular/core';
 import {MatDialog} from '@angular/material/dialog';
 // import {MatSnackBar} from '@angular/material/snack-bar';
 import {MessageDialogComponent} from 'app/shared/dialogs/message/message-dialog.component';
 import {Subscription} from 'rxjs';
-import {IDocument, IMappedDocument, IMappedField, IMappedInput, IPdfDocument, IXlsxDocument} from '../../../bridge/shared.model';
+import {IInitialData, IMappedDocument, IMappedField, IMappedInput, IPdfDocument, IProfile, IXlsxDocument} from '../../../bridge/shared.model';
 import {APP_CONFIG} from '../../environments/environment';
 import {AppService} from '../services/app.service';
 import {ElectronService} from '../services/electron.service';
@@ -20,7 +19,7 @@ type TUITemplateInput = IMappedInput & IMappedField & { info: string };
            })
 export class HomeComponent implements OnInit, OnDestroy {
 
-  dataSource: IDocument[] = [];
+  dataSource: IMappedDocument[] = [];
   exportMsgs: string[] = [];
   exportedFields: TUITemplateInput[] = [];
   exportSuffix: string;
@@ -28,16 +27,7 @@ export class HomeComponent implements OnInit, OnDestroy {
   currentSort: 'aufsteigend' | 'absteigend' = 'aufsteigend';
 
   profileId = '';
-  profiles: { id: string, name: string }[] = [{
-    id:   'p1',
-    name: 'P1'
-  }, {
-    id:   'p2',
-    name: 'P2'
-  }, {
-    id:   'p3',
-    name: 'P3'
-  }];
+  profiles: IProfile[];
 
   // private snackSub: Subscription;
   private dialogSub: Subscription;
@@ -71,16 +61,17 @@ export class HomeComponent implements OnInit, OnDestroy {
         });
       }),
 
-      electronService.finishedLoading$.subscribe((data: IDocument[]) => {
+      electronService.finishedLoading$.subscribe((data: IInitialData) => {
         console.log('58: finish load');
         // finished load gets initiated by the main process so we need to get it into the zone
         this.ngZone.runTask(() => {
           console.log('61: really finished load');
-          this.updateDataSource(data);
+          this.updateDataSource(data.documents);
+          this.profiles = data.profiles;
         });
       }),
 
-      electronService.update$.subscribe((data: IDocument[]) => {
+      electronService.update$.subscribe((data: IMappedDocument[]) => {
         console.log('65: update');
         this.updateDataSource(data);
       }),
@@ -115,7 +106,7 @@ export class HomeComponent implements OnInit, OnDestroy {
     );
   }
 
-  private updateDataSource(newData: IDocument[]) {
+  private updateDataSource(newData: IMappedDocument[]) {
     this.dataSource = newData;
     if (this.dataSource?.length) {
       this.sortDocuments();
@@ -128,18 +119,13 @@ export class HomeComponent implements OnInit, OnDestroy {
   }
 
   private findTemplate(origId: string) {
-    return this.dataSource.find(document => ((document as any).mapped || []).find((field: IMappedField) => field.origId === origId));
+    return this.dataSource.find(document => (document.mapped || []).find((field: IMappedField) => field.origId === origId));
   }
 
   private updateExportedFields() {
     const mappedFields = this.dataSource
                              .filter(document => document.export)
-                             .map(document => {
-                               if (document.type === 'pdf') return (document as IPdfDocument).mapped;
-                               if (document.type === 'xlsx') return (document as IXlsxDocument).mapped;
-                               return [];
-                             })
-                             .reduce((result, current) => result.concat(current), [])
+                             .flatMap(document =>  document.mapped || [])
                              .filter(field => field.export);
 
 
@@ -167,7 +153,7 @@ export class HomeComponent implements OnInit, OnDestroy {
   }
 
   // use confirm dialog
-  private removeDocument(template: IDocument) {
+  private removeDocument(template: IMappedDocument) {
     if (this.dataSource) {
       this.dataSource.splice(this.dataSource.indexOf(template), 1);
       this.electronService.removeDocument(template);
@@ -179,8 +165,8 @@ export class HomeComponent implements OnInit, OnDestroy {
   private removeField(field: IMappedField) {
     if (this.dataSource) {
       const document =
-              (this.dataSource.filter(template => template.type !== 'resource') as (IMappedDocument)[])
-                .find(template => template.mapped.find(tfield => tfield.origId === field.origId));
+              this.dataSource.filter(template => template.type !== 'resource')
+                  .find(template => template.mapped.find(tfield => tfield.origId === field.origId));
       document.mapped.splice(document.mapped.indexOf(field), 1);
       this.electronService.save(document);
       this.updateExportedFields();
@@ -225,7 +211,7 @@ export class HomeComponent implements OnInit, OnDestroy {
     this.electronService.openOutputFolder('');
   }
 
-  changedDocument(template: IDocument) {
+  changedDocument(template: IMappedDocument) {
     this.electronService.save(template);
     this.updateExportedFields();
   }
@@ -236,7 +222,7 @@ export class HomeComponent implements OnInit, OnDestroy {
     this.updateExportedFields();
   }
 
-  showConfirmDialog(document: IDocument, field: IMappedField, $event: MouseEvent) {
+  showConfirmDialog(document: IMappedDocument, field: IMappedField, $event: MouseEvent) {
     $event.stopPropagation(); // dont trigger the expandable panel
     const dialogRef = this.dialog.open(ConfirmDialogComponent, {data: !!document});
     if (this.dialogSub && !this.dialogSub.closed) {
@@ -256,7 +242,7 @@ export class HomeComponent implements OnInit, OnDestroy {
   showFieldMappingDialog(node: IXlsxDocument | IPdfDocument | any, $event: MouseEvent) {
     $event.stopPropagation(); // dont trigger the expandable panel
     const possibleFields = node.type === 'pdf' ? node.fields : node.sheets;
-    const fieldNames: string[] = this.dataSource.flatMap((docu) => ((docu as IMappedDocument).mapped || []).map(field => field.clearName));
+    const fieldNames: string[] = this.dataSource.flatMap((docu) => (docu.mapped || []).map(field => field.clearName));
     const dialogRef = this.dialog.open(FieldDialogComponent, {data: {possibleFields, used: node.mapped, type: node.type, fieldNames}});
 
     if (this.dialogSub && !this.dialogSub.closed) {
@@ -288,7 +274,7 @@ export class HomeComponent implements OnInit, OnDestroy {
     this.electronService.openFileWithExplorer(node.previewfile);
   }
 
-  showDocument(node: IDocument, $event: MouseEvent) {
+  showDocument(node: IMappedDocument, $event: MouseEvent) {
     $event.stopPropagation(); // dont trigger the expandable panel
     this.electronService.openFileWithExplorer(node.filename);
   }
@@ -310,7 +296,7 @@ export class HomeComponent implements OnInit, OnDestroy {
     console.log($event);
     this.dataSource.forEach(document => {
       document.export = !document.export;
-      (document as IMappedDocument).mapped?.forEach(field => field.export = true);
+      document.mapped?.forEach(field => field.export = true);
     });
     this.updateExportedFields();
   }
