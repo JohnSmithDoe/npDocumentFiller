@@ -59,7 +59,7 @@ export class NpAssistant {
     return [];
   }
 
-  private static writeProfiles(profiles: IProfile[]){
+  private static writeProfiles(profiles: IProfile[]) {
     try {
       fs.writeFileSync(profileFile, JSON.stringify(profiles), {encoding: 'utf8'});
     } catch (e) {
@@ -192,16 +192,36 @@ export class NpAssistant {
     startWithExpolorer(previewfile);
   }
 
+
+  remapDocument(filename: string) {
+    if (!this.database[filename]) throw new Error('Dieses Dokument existiert nicht mehr. Bitte wenden Sie sich an Ihren persönlichen Ansprechpartner für IT-Probleme.');
+    const newfilename = showFilePickerSync(this.mainWindow, {
+      defaultPath: path.dirname(filename), title: 'Dokument neu verknüpfen'
+    });
+    if (fs.existsSync(newfilename)) {
+      const {basename, type, mtimeMs} = NpAssistant.getFileStats(newfilename);
+      const oldDoc = this.database[filename];
+      if (type !== oldDoc.type) throw new Error('Es kann hier nur eine Änderung des Dateinamens vorgenommen werden. Eine Änderung der Vorlage geht nur über löschen und neu anlegen.');
+      oldDoc.filename = newfilename;
+      oldDoc.name = basename;
+      oldDoc.mtime = mtimeMs;
+
+      delete this.database[filename];
+      this.database[newfilename] = oldDoc;
+      NpAssistant.writeDatabase(this.database);
+    } else {
+      if(newfilename) throw new Error('Die gewählte Datei konnte nicht gelesen werden. Bitte wenden Sie sich an Ihren persönlichen Ansprechpartner für IT-Probleme.');
+    }
+    return this.documents;
+  }
+
   async addNewFileTemplate(): Promise<IMappedDocument[]> {
     const filename = showFilePickerSync(this.mainWindow, {
-      defaultPath: '', title: 'Dokument verknüpfen', filters: [
-        {name: 'Alle Dokumente', extensions: ['*']},
-        {name: 'Pdf Dokumente', extensions: ['pdf']},
-        {name: 'Excel Dokumente', extensions: ['xlsx']},
-      ]
+      defaultPath: '', title: 'Dokument verknüpfen'
     });
 
     if (fs.existsSync(filename)) {
+      if (!!this.database[filename]) throw new Error('Dieses Dokument existiert bereits. Bitte keine doppelten Dokumente anlegen. Bei Problemen entferne die alte Vorlage und beginne von vorne.');
       const {basename, basenameNoExt, type, mtimeMs} = NpAssistant.getFileStats(filename);
       if (type === 'pdf') {
         this.addNewPdfTemplate(filename, basename, basenameNoExt, mtimeMs);
@@ -211,6 +231,8 @@ export class NpAssistant {
         this.database[filename] = {id: uuidv4(), name: basename, filename, export: true, type: 'resource', mtime: mtimeMs};
       }
       NpAssistant.writeDatabase(this.database);
+    } else {
+      if(filename) throw new Error('Die gewählte Datei konnte nicht gelesen werden. Bitte wenden Sie sich an Ihren persönlichen Ansprechpartner für IT-Probleme.');
     }
     return this.documents;
   }
@@ -232,7 +254,7 @@ export class NpAssistant {
           sheet.getCell(cell).value = value;
         }
       } else {
-        throw new Error('No Worksheet found');
+        throw new Error('Die Excel Datei enthält keine Arbeitsmappen');
       }
     });
     await workbook.xlsx.writeFile(outCopy);
@@ -285,7 +307,8 @@ export class NpAssistant {
   get profiles() {
     return NpAssistant.readProfiles();
   }
-  set profiles(profiles){
+
+  set profiles(profiles) {
     NpAssistant.writeProfiles(profiles);
   }
 }

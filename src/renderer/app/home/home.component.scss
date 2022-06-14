@@ -23,6 +23,11 @@ $color-reddish: mat.get-color-from-palette(mat.$orange-palette, 300);
       grid-area: content-left;
       mat-accordion {
         margin-top: 1rem;
+        .field-container {
+          display: flex;
+          width: 100%;
+          align-items: baseline;
+        }
       }
     }
 
@@ -34,7 +39,7 @@ $color-reddish: mat.get-color-from-palette(mat.$orange-palette, 300);
     }
 
     @media (max-width: 945px) {
-      width: 100%
+      width:  calc(100% - 2rem);
     }
   }
 

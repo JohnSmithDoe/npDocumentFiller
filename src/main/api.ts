@@ -75,7 +75,7 @@ export class ApiController {
   }
 
   private remapTemplate(event: IpcMainEvent, filename: string) {
-
+    return this.npAssistant.remapDocument(filename);
   }
 }
 

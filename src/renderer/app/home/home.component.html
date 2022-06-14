@@ -65,18 +65,16 @@
 
         </mat-panel-description>
       </mat-expansion-panel-header>
-      <ng-container *ngFor="let node of (doc.mapped || [])">
+      <div class="field-container" *ngFor="let node of (doc.mapped || [])">
         <mat-form-field class="no-padding">
           <mat-label>{{node.mappedName}}</mat-label>
           <input matInput [(ngModel)]="node.clearName" type="text" placeholder="{{node.mappedName}}" (ngModelChange)="changingName()" (blur)="blurNameInput(node)">
         </mat-form-field>
-        <div class="field-actions">
-          <button (click)="showConfirmDialog(null,node, null, $event)" color="warn" mat-icon-button matTooltip="Dokument entfernen" aria-label="Remove the selected document">
-            <mat-icon class="mat-icon-rtl-mirror">delete</mat-icon>
-          </button>
-          <mat-checkbox color="primary" [(ngModel)]="node.export" (ngModelChange)="changedField(node)">Exportieren &nbsp;</mat-checkbox>
-        </div>
-      </ng-container>
+        <button (click)="showConfirmDialog(null,node, null, $event)" color="warn" mat-icon-button matTooltip="Dokument entfernen" aria-label="Remove the selected document">
+          <mat-icon class="mat-icon-rtl-mirror">delete</mat-icon>
+        </button>
+        <mat-checkbox color="primary" [(ngModel)]="node.export" (ngModelChange)="changedField(node)">Exportieren &nbsp;</mat-checkbox>
+      </div>
       <ng-container *ngIf="!doc.mapped">
         <p class="no-add">Diese Vorlage kann nur kopiert werden.</p>
       </ng-container>

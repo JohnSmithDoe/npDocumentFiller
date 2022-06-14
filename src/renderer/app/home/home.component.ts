@@ -3,7 +3,7 @@ import {MatDialog} from '@angular/material/dialog';
 // import {MatSnackBar} from '@angular/material/snack-bar';
 import {MessageDialogComponent} from 'app/shared/dialogs/message/message-dialog.component';
 import {Subscription} from 'rxjs';
-import {IInitialData, IMappedDocument, IMappedField, IMappedInput, IPdfDocument, IProfile, IXlsxDocument, TTemplateType} from '../../../bridge/shared.model';
+import {IInitialData, IMappedDocument, IMappedField, IMappedInput, IPdfDocument, IProfile, IXlsxDocument} from '../../../bridge/shared.model';
 import {APP_CONFIG} from '../../environments/environment';
 import {AppService} from '../services/app.service';
 import {ElectronService} from '../services/electron.service';
@@ -96,7 +96,7 @@ export class HomeComponent implements OnInit, OnDestroy {
                            data:         {
                              headline: 'Es ist ein Problem aufgetreten',
                              msgs:     err,
-                             folder:   this.exportFolder
+                             folder:   undefined
                            },
                            disableClose: true,
                            autoFocus:    'dialog',
@@ -179,7 +179,7 @@ export class HomeComponent implements OnInit, OnDestroy {
     // this.electronService.getTemplates();
     if (!this.electronService.isElectron) {
       this.appService.modal$.next(false);
-      this.profiles = [{id: 'p1', name: 'P1', documentIds: [], fieldIds: []},{id: 'p2', name: 'P2', documentIds: [], fieldIds: []}];
+      this.profiles = [{id: 'p1', name: 'P1', documentIds: [], fieldIds: []}, {id: 'p2', name: 'P2', documentIds: [], fieldIds: []}];
       this.updateDataSource(APP_CONFIG.testData);
     }
   }
@@ -229,7 +229,7 @@ export class HomeComponent implements OnInit, OnDestroy {
     this.updateExportedFields();
   }
 
-  showConfirmDialog(document: IMappedDocument, field: IMappedField, profile:string, $event: MouseEvent,) {
+  showConfirmDialog(document: IMappedDocument, field: IMappedField, profile: string, $event: MouseEvent,) {
     $event.stopPropagation(); // dont trigger the expandable panel
     const type = !!document ? 'Dokument' : !!field ? 'Feld' : 'Export Profil';
     const dialogRef = this.dialog.open(ConfirmDialogComponent, {data: type});
@@ -252,7 +252,9 @@ export class HomeComponent implements OnInit, OnDestroy {
   showFieldMappingDialog(node: IXlsxDocument | IPdfDocument | any, $event: MouseEvent) {
     $event.stopPropagation(); // dont trigger the expandable panel
     const possibleFields = node.type === 'pdf' ? node.fields : node.sheets;
-    const fieldNames: string[] = this.dataSource.flatMap((docu) => (docu.mapped || []).map(field => field.clearName));
+    const fieldNames: string[] = this.dataSource
+                                     .flatMap((docu) => (docu.mapped || []).map(field => field.clearName))
+                                     .filter((item, idx, arr) => arr.indexOf(item) === idx);
     const dialogRef = this.dialog.open(FieldDialogComponent, {data: {possibleFields, used: node.mapped, type: node.type, fieldNames}});
 
     if (this.dialogSub && !this.dialogSub.closed) {
@@ -329,16 +331,18 @@ export class HomeComponent implements OnInit, OnDestroy {
   }
 
   addProfile() {
-    const dialogRef = this.dialog.open(AddProfileDialogComponent, {   autoFocus:    'dialog',
+    const dialogRef = this.dialog.open(AddProfileDialogComponent, {
+      autoFocus:    'dialog',
       hasBackdrop:  true,
-      restoreFocus: true});
+      restoreFocus: true
+    });
 
     if (this.dialogSub && !this.dialogSub.closed) {
       this.dialogSub.unsubscribe();
     }
     this.dialogSub = dialogRef.afterClosed().subscribe((result: string) => {
       if (result) {
-        this.profileId = `${Date.now()}`
+        this.profileId = `${Date.now()}`;
         this.profiles.push({id: this.profileId, name: result, fieldIds: [], documentIds: []});
         this.saveProfile();
       }
