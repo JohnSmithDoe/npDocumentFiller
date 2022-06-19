@@ -1,3 +1,14 @@
+export interface IAppConfig {
+  PDFTK_EXE?: string;
+  ENCODING?: string;
+  DATA_PATH?: string;
+  TMP_PATH?: string;
+  CACHE_PATH?: string;
+  OUTPUT_PATH?: string;
+  DB_FILE?: string;
+  PROFILE_FILE?: string;
+}
+
 export type TTemplateType = 'pdf' | 'xlsx' | 'resource';
 
 interface IDocument<T = TTemplateType> {
@@ -24,7 +35,7 @@ export interface IPdfDocument extends IMappedDocument<'pdf'> {
 
 export interface IMappedField {
   origId: string;
-  clearName: string;
+  name: string;
   mappedName: string;
   export?: boolean;
 

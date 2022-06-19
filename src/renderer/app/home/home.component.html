@@ -68,7 +68,7 @@
       <div class="field-container" *ngFor="let node of (doc.mapped || [])">
         <mat-form-field class="no-padding">
           <mat-label>{{node.mappedName}}</mat-label>
-          <input matInput [(ngModel)]="node.clearName" type="text" placeholder="{{node.mappedName}}" (ngModelChange)="changingName()" (blur)="blurNameInput(node)">
+          <input matInput [(ngModel)]="node.name" type="text" placeholder="{{node.mappedName}}" (ngModelChange)="changingName()" (blur)="blurNameInput(node)">
         </mat-form-field>
         <button (click)="showConfirmDialog(null,node, null, $event)" color="warn" mat-icon-button matTooltip="Dokument entfernen" aria-label="Remove the selected document">
           <mat-icon class="mat-icon-rtl-mirror">delete</mat-icon>
@@ -132,8 +132,8 @@
     <h4>Werte die in die Unterlagen eingefügt werden</h4>
     <div *ngFor="let field of exportedFields" style="margin-bottom: 1rem">
       <mat-form-field>
-        <mat-label>{{field.clearName}}</mat-label>
-        <input matInput [(ngModel)]="field.value" type="text" placeholder="{{field.clearName}}">
+        <mat-label>{{field.name}}</mat-label>
+        <input matInput [(ngModel)]="field.value" type="text" placeholder="{{field.name}}">
         <mat-hint><small><strong>Verwendet in: </strong>{{field.info}}</small></mat-hint>
       </mat-form-field>
     </div>

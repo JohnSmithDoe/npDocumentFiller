@@ -1,14 +1,7 @@
 import {spawnSync} from 'child_process';
 import {readFileSync, writeFileSync} from 'fs';
 import {decode, encode} from 'iconv-lite';
-import {join, resolve} from 'path';
 import {CFDFError, CFDFStarter, CFDFTagClose, CFDFTagKids, CFDFTagOpen, CFDFTagTarget, CFDFTagValue, CFDFTrailer, IFDFModel, IFDFValue,} from './pdf.types';
-
-const pdftk = process.env.APP_PDFTK_EXE || resolve(join('.', 'pdftk', 'bin', 'pdftk.exe'));
-
-// To get the encoding of a file we need to "guess" so we only split win and others :)
-const encoding = process.env.APP_ENCODING || (process.platform === 'win32' ? 'win1252' : 'utf8')
-
 
 function stripLastChars(txt: string, chars: string, trim = true) {
   const stripped = txt.endsWith(chars) ? txt.substring(0, txt.length - chars.length) : txt;
@@ -100,6 +93,12 @@ function parseFields(data: string) {
 }
 
 export class PdfService {
+
+
+  constructor(private pdftk: string,  private encoding: string) {
+
+  }
+
   /** strips the header and trailer of the fdf file and returns only the fields part */
   private parseFDF(data: string): { fdf: IFDFModel; allValues: IFDFValue[] } {
     data = validateFDF(data);
@@ -159,24 +158,24 @@ export class PdfService {
 
   readFDF(filename: string): { fdf: IFDFModel; allValues: IFDFValue[]; fileContent: string } {
     const buffer = readFileSync(filename);
-    const fileContent = decode(buffer, encoding);
+    const fileContent = decode(buffer, this.encoding);
     const {fdf, allValues} = this.parseFDF(fileContent);
     return {fdf, allValues, fileContent};
   }
 
   writeFDF(filename: string, fdf: IFDFModel): string {
     const data = this.assembleFDF(fdf);
-    writeFileSync(filename, encode(data, encoding));
+    writeFileSync(filename, encode(data, this.encoding));
     return data;
   }
 
   extractFDF(pdffile: string, outfile: string) {
     const args = [pdffile, 'generate_fdf', 'output', outfile];
-    spawnSync(pdftk, args, {});
+    spawnSync(this.pdftk, args, {});
   }
 
   applyFDF(pdffile: string, fdffile: string, outfile: string) {
     const args = [pdffile, 'fill_form', fdffile, 'output', outfile];
-    spawnSync(pdftk, args, {});
+    spawnSync(this.pdftk, args, {});
   }
 }

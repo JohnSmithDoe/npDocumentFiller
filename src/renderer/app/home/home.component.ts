@@ -1,6 +1,5 @@
 import {Component, NgZone, OnDestroy, OnInit} from '@angular/core';
 import {MatDialog} from '@angular/material/dialog';
-// import {MatSnackBar} from '@angular/material/snack-bar';
 import {MessageDialogComponent} from 'app/shared/dialogs/message/message-dialog.component';
 import {Subscription} from 'rxjs';
 import {IInitialData, IMappedDocument, IMappedField, IMappedInput, IPdfDocument, IProfile, IXlsxDocument} from '../../../bridge/shared.model';
@@ -30,7 +29,6 @@ export class HomeComponent implements OnInit, OnDestroy {
   profileId = '';
   profiles: IProfile[] = [];
 
-  // private snackSub: Subscription;
   private dialogSub: Subscription;
   private subs: Subscription[] = [];
 
@@ -38,7 +36,6 @@ export class HomeComponent implements OnInit, OnDestroy {
 
   constructor(
     private readonly electronService: ElectronService,
-    // private readonly snackBarService: MatSnackBar,
     private readonly appService: AppService,
     private readonly dialog: MatDialog,
     private readonly ngZone: NgZone
@@ -138,11 +135,10 @@ export class HomeComponent implements OnInit, OnDestroy {
                  value:       this.findExportedValue(origId),
                  identifiers: [origId],
                  info:        this.findTemplate(origId)?.name || '',
-                 name:        field.clearName,
                  origId
                }))
         .filter((field, index, arr) => {
-          const firstIdx = arr.findIndex((search) => search.clearName === field.clearName);
+          const firstIdx = arr.findIndex((search) => search.name === field.name);
           if ((firstIdx !== index)) {
             arr[firstIdx].info += ' & ' + field.info;
             arr[firstIdx].identifiers.push(...field.identifiers);
@@ -178,9 +174,11 @@ export class HomeComponent implements OnInit, OnDestroy {
     console.log('Init App');
     // this.electronService.getTemplates();
     if (!this.electronService.isElectron) {
-      this.appService.modal$.next(false);
-      this.profiles = [{id: 'p1', name: 'P1', documentIds: [], fieldIds: []}, {id: 'p2', name: 'P2', documentIds: [], fieldIds: []}];
-      this.updateDataSource(APP_CONFIG.testData);
+      setTimeout(() => {
+        this.appService.modal$.next(false);
+        this.profiles = [{id: 'p1', name: 'P1', documentIds: [], fieldIds: []}, {id: 'p2', name: 'P2', documentIds: [], fieldIds: []}];
+        this.updateDataSource(APP_CONFIG.testData);
+      }, 200);
     }
   }
 
@@ -253,7 +251,7 @@ export class HomeComponent implements OnInit, OnDestroy {
     $event.stopPropagation(); // dont trigger the expandable panel
     const possibleFields = node.type === 'pdf' ? node.fields : node.sheets;
     const fieldNames: string[] = this.dataSource
-                                     .flatMap((docu) => (docu.mapped || []).map(field => field.clearName))
+                                     .flatMap((docu) => (docu.mapped || []).map(field => field.name))
                                      .filter((item, idx, arr) => arr.indexOf(item) === idx);
     const dialogRef = this.dialog.open(FieldDialogComponent, {data: {possibleFields, used: node.mapped, type: node.type, fieldNames}});
 

@@ -68,8 +68,13 @@ function createWindow(): void {
       event.sender.send(EAppChannels.FINISHED_LOAD, initialData);
     }
   });
-  assistant = new NpAssistant(win);
-  win.loadURL(indexUrl);
+  try {
+    assistant = new NpAssistant(win);
+    win.loadURL(indexUrl);
+  } catch (e) {
+    console.log(e);
+    app.quit();
+  }
 }
 
 try {

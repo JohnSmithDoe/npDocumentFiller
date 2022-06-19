@@ -2,9 +2,9 @@
 <mat-dialog-content class="mat-typography">
   <mat-form-field *ngIf="data.type === 'pdf'">
     <mat-label>Feld aus der Vorlage</mat-label>
-    <mat-select [(ngModel)]="current.id">
+    <mat-select [(ngModel)]="current.id" (ngModelChange)="fieldChosen($event)">
       <mat-option *ngFor="let field of data.possibleFields; let index=index" [value]="field.id"  [disabled]="field.disabled">
-        Feld {{index}}
+        {{field.name}}
       </mat-option>
     </mat-select>
     <mat-hint>Der Feldname aus der pdf Vorlage</mat-hint>
@@ -45,14 +45,14 @@
 
 
   <mat-form-field>
-    <mat-label>Bezeichnung</mat-label>
+    <mat-label>Eigene Bezeichnung</mat-label>
     <input matInput [(ngModel)]="current.name" (ngModelChange)="updateFilter($event)" type="text" placeholder="Eigene Feldbezeichnung" [matAutocomplete]="auto">
     <mat-autocomplete #auto="matAutocomplete">
       <mat-option *ngFor="let option of filteredNames$ | async" [value]="option">
         {{option}}
       </mat-option>
     </mat-autocomplete>
-    <mat-hint>Felder mit gleichen Bezeichnungen werden Dokumenten weit zusammengelegt</mat-hint>
+    <mat-hint>Kann man ändern muss man aber nicht. <br> Felder mit gleichen Bezeichnungen erhalten auch den selben Wert</mat-hint>
   </mat-form-field>
 
 </mat-dialog-content>

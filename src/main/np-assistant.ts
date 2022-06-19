@@ -2,19 +2,40 @@ import {BrowserWindow} from 'electron';
 import * as ExcelJS from 'exceljs';
 import * as fs from 'fs';
 import * as path from 'path';
+import {join, resolve} from 'path';
 import {v4 as uuidv4} from 'uuid';
-import {IMappedDocument, IMappedField, IMappedInput, IPdfDocument, IProfile, IXlsxDocument, TAppDatabase, TTemplateType} from '../bridge/shared.model';
+import {IAppConfig, IMappedDocument, IMappedField, IMappedInput, IPdfDocument, IProfile, IXlsxDocument, TAppDatabase, TTemplateType} from '../bridge/shared.model';
 import {ApiController} from './api';
 import {PdfService} from './pdf/pdf.service';
 import {showFilePickerSync} from './utils/electron.utils';
 import {startWithExpolorer} from './utils/shell.utils';
 
-const dataPath = process.env.APP_DATA || path.resolve('./data');
-const tmpPath = process.env.APP_TEMP || path.join(dataPath, 'tmp');
-const cachePath = process.env.APP_CACHE || path.join(dataPath, 'cache');
-const outputPath = process.env.APP_OUTPUT || path.join(dataPath, 'out');
-const dataFile = process.env.APP_CONFIG || path.join(dataPath, 'data.db');
-const profileFile = process.env.APP_CONFIG || path.join(dataPath, 'profiles.db');
+const args  = process.argv.slice(1),
+      debug = args.some(val => val === '--npdebug');
+
+const npConfigFile = path.resolve('./.npconfig');
+
+let npConfig: IAppConfig = {};
+try {
+  const npConfigContent = fs.readFileSync(npConfigFile, {encoding: 'utf8'});
+  npConfig = JSON.parse(npConfigContent);
+} catch (e) { }
+
+const dataPath = npConfig.DATA_PATH || process.env.APP_DATA || path.resolve('./data');
+const tmpPath = npConfig.TMP_PATH || process.env.APP_TEMP || path.join(dataPath, 'tmp');
+const cachePath = npConfig.CACHE_PATH || process.env.APP_CACHE || path.join(dataPath, 'cache');
+const outputPath = npConfig.OUTPUT_PATH || process.env.APP_OUTPUT || path.join(dataPath, 'out');
+const dataFile = npConfig.DB_FILE || process.env.APP_CONFIG || path.join(dataPath, 'data.db');
+const profileFile = npConfig.PROFILE_FILE || process.env.APP_CONFIG || path.join(dataPath, 'profiles.db');
+
+// Get the pdftk.exe
+const pdftk = npConfig.PDFTK_EXE || process.env.APP_PDFTK_EXE || resolve(join('.', 'pdftk', 'bin', 'pdftk.exe'));
+// To get the encoding of a file we need to "guess" so we only split win and others :)
+const encoding = npConfig.ENCODING || process.env.APP_ENCODING || (process.platform === 'win32' ? 'win1252' : 'utf8');
+
+if (debug) {
+  console.log(npConfig, pdftk);
+}
 
 export class NpAssistant {
 
@@ -25,7 +46,10 @@ export class NpAssistant {
   constructor(private readonly mainWindow: BrowserWindow) {
     this.database = NpAssistant.readDatabase();
     this.api = new ApiController(this);
-    this.pdf = new PdfService();
+    if(!fs.existsSync(pdftk)){
+      throw new Error('Es muss das PDFToolkit installiert sein. https://www.pdflabs.com/tools/pdftk-the-pdf-toolkit/. Falls Du dies schon installiert hast lege bitte eine .npconfig Datei mit dem passenden schema an.')
+    }
+    this.pdf = new PdfService(pdftk, encoding);
   }
 
   private static readDatabase() {
@@ -77,7 +101,7 @@ export class NpAssistant {
   private static removeTempCopy(filename: string) {
     const basename = path.basename(filename);
     const tmpCopy = path.join(tmpPath, basename);
-    fs.rmSync(tmpCopy);
+    if (!debug) fs.rmSync(tmpCopy);
     return tmpCopy;
   }
 
@@ -174,10 +198,10 @@ export class NpAssistant {
     const fdfFile = NpAssistant.extractFDFToTemp(tmpCopy, this.pdf);
 
     const {fdf, allValues} = this.pdf.readFDF(fdfFile);
-    // map allValues to Feld # and write a preview file
+    // map allValues to Feld # or original id and write a preview file
     const fields = allValues
       .map((fdfValue, index) => {
-        fdfValue.value = `Feld ${index}`;
+        fdfValue.value = fdfValue.path;
         return fdfValue;
       })
       .map(fdfValue => ({id: uuidv4(), name: fdfValue.path}));
@@ -210,7 +234,7 @@ export class NpAssistant {
       this.database[newfilename] = oldDoc;
       NpAssistant.writeDatabase(this.database);
     } else {
-      if(newfilename) throw new Error('Die gewählte Datei konnte nicht gelesen werden. Bitte wenden Sie sich an Ihren persönlichen Ansprechpartner für IT-Probleme.');
+      if (newfilename) throw new Error('Die gewählte Datei konnte nicht gelesen werden. Bitte wenden Sie sich an Ihren persönlichen Ansprechpartner für IT-Probleme.');
     }
     return this.documents;
   }
@@ -232,7 +256,7 @@ export class NpAssistant {
       }
       NpAssistant.writeDatabase(this.database);
     } else {
-      if(filename) throw new Error('Die gewählte Datei konnte nicht gelesen werden. Bitte wenden Sie sich an Ihren persönlichen Ansprechpartner für IT-Probleme.');
+      if (filename) throw new Error('Die gewählte Datei konnte nicht gelesen werden. Bitte wenden Sie sich an Ihren persönlichen Ansprechpartner für IT-Probleme.');
     }
     return this.documents;
   }

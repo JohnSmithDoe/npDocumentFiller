@@ -3,6 +3,8 @@
 pdftk
 data
 app/**/*.js
+# config / env file
+.npconfig
 
 # compiled output
 /dist

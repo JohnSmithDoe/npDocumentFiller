@@ -1,10 +1,10 @@
 {
-  "asar": false,
-  "directories": {
+  "asar":           false,
+  "directories":    {
     "output": "release/",
-    "app": "src/main"
+    "app":    "src/main"
   },
-  "files": [
+  "files":          [
     "**/*",
     "!**/*.ts",
     "!*.map",
@@ -13,51 +13,61 @@
   ],
   "extraResources": [
     {
-      "from": "dist/main",
-      "to": "app",
+      "from":   "dist/main",
+      "to":     "app",
       "filter": [
         "**/*",
         "!*.map"
       ]
     },
     {
-      "from": "dist/bridge",
-      "to": "bridge",
+      "from":   "dist/bridge",
+      "to":     "bridge",
       "filter": [
         "**/*",
         "!*.map"
       ]
     },
     {
-      "from": "dist/renderer",
-      "to": "renderer",
+      "from":   "dist/renderer",
+      "to":     "renderer",
       "filter": [
         "**/*",
         "!*.map"
       ]
     },
     {
-      "from": "pdftk",
-      "to": "../pdftk",
+      "from":   "pdftk",
+      "to":     "../pdftk",
       "filter": [
         "**/*"
       ]
     }
   ],
-  "win": {
-    "icon": "dist/renderer/assets/icons",
-    "target": [ ]
+  "win":            {
+    "icon":   "dist/renderer/assets/icons",
+    "target": [
+      "nsis"
+    ]
   },
-  "portable": {
+  "nsis":           {
+    "oneClick":                           false,
+    "deleteAppDataOnUninstall":           true,
+    "allowElevation":                     true,
+    "allowToChangeInstallationDirectory": true,
+    "license":                            "./eula.txt",
+    "perMachine":                         false,
+    "publish":                            null,
+    "createDesktopShortcut":              true
   },
-  "mac": {
-    "icon": "dist/renderer/assets/icons",
+  "mac":            {
+    "icon":   "dist/renderer/assets/icons",
     "target": [
       "dmg"
     ]
   },
-  "linux": {
-    "icon": "dist/renderer/assets/icons",
+  "linux":          {
+    "icon":   "dist/renderer/assets/icons",
     "target": [
       "AppImage"
     ]

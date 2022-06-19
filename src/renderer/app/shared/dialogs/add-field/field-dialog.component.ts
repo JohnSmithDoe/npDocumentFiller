@@ -50,13 +50,13 @@ export class FieldDialogComponent implements OnInit {
     //   : `$${this.current.id}.${this.current.column}${this.current.row}`;
     const orig = this.data.possibleFields.find(field => field.id === this.current.id);
     const mappedName = this.data.type === 'pdf'
-      ? 'Feld ' + this.data.possibleFields.findIndex(field => field.id === this.current.id)
+      ?  orig.name
       : `$${orig.name}.${this.current.column}${this.current.row}`;
 
     const mappedField: IMappedField = {
-      origId:    this.current.id,
-      clearName: this.current.name,
-      export:    true,
+      origId: this.current.id,
+      name:   this.current.name,
+      export: true,
       mappedName
     };
 
@@ -87,5 +87,11 @@ export class FieldDialogComponent implements OnInit {
 
   updateFilter($event: any) {
     this.fieldNameControl.setValue($event);
+  }
+
+  fieldChosen(id: string) {
+    const orig = this.data.possibleFields.find(field => field.id === id);
+    if(!orig) return false;
+    this.current.name = orig.name;
   }
 }

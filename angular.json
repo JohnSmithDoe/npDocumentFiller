@@ -1,130 +1,92 @@
 {
-  "$schema": "./node_modules/@angular/cli/lib/config/schema.json",
-  "cli": {
+  "$schema":        "./node_modules/@angular/cli/lib/config/schema.json",
+  "cli":            {
   },
-  "version": 1,
+  "version":        1,
   "newProjectRoot": "projects",
-  "projects": {
+  "projects":       {
     "np-document-filler": {
-      "root": "",
-      "sourceRoot": "src/renderer",
+      "root":        "",
+      "sourceRoot":  "src/renderer",
       "projectType": "application",
-      "schematics": {
+      "schematics":  {
         "@schematics/angular:application": {
           "strict": true
         },
-        "@schematics/angular:component": {
+        "@schematics/angular:component":   {
           "style": "scss"
         }
       },
-      "prefix": "app",
-      "architect": {
+      "prefix":      "app",
+      "architect":   {
         "build": {
-          "builder": "@angular-builders/custom-webpack:browser",
-          "options": {
-            "outputPath": "dist/renderer",
-            "index": "src/renderer/index.html",
-            "main": "src/renderer/main.ts",
-            "tsConfig": "src/renderer/tsconfig.app.json",
-            "polyfills": "src/renderer/polyfills.ts",
+          "builder":        "@angular-builders/custom-webpack:browser",
+          "options":        {
+            "outputPath":          "dist/renderer",
+            "index":               "src/renderer/index.html",
+            "main":                "src/renderer/main.ts",
+            "tsConfig":            "src/renderer/tsconfig.app.json",
+            "polyfills":           "src/renderer/polyfills.ts",
             "inlineStyleLanguage": "scss",
-            "assets": [
+            "assets":              [
               "src/renderer/favicon.ico",
               "src/renderer/assets"
             ],
-            "styles": [
+            "styles":              [
               "src/renderer/styles.scss"
             ],
-            "scripts": [],
+            "scripts":             [],
             "customWebpackConfig": {
-              "path": "./angular.webpack.js",
+              "path":                    "./angular.webpack.js",
               "replaceDuplicatePlugins": true
             }
           },
           "configurations": {
-            "dev": {
-              "optimization": false,
-              "outputHashing": "none",
-              "sourceMap": true,
-              "namedChunks": false,
-              "aot": false,
-              "extractLicenses": true,
-              "vendorChunk": false,
-              "buildOptimizer": false,
+            "dev":        {
+              "optimization":     false,
+              "outputHashing":    "none",
+              "sourceMap":        true,
+              "namedChunks":      false,
+              "aot":              false,
+              "extractLicenses":  true,
+              "vendorChunk":      false,
+              "buildOptimizer":   false,
               "fileReplacements": [
                 {
                   "replace": "src/renderer/environments/environment.ts",
-                  "with": "src/renderer/environments/environment.dev.ts"
+                  "with":    "src/renderer/environments/environment.dev.ts"
                 }
               ]
             },
             "production": {
-              "optimization": true,
-              "outputHashing": "all",
-              "sourceMap": false,
-              "namedChunks": false,
-              "aot": true,
-              "extractLicenses": true,
-              "vendorChunk": false,
-              "buildOptimizer": true,
+              "optimization":     true,
+              "outputHashing":    "all",
+              "sourceMap":        false,
+              "namedChunks":      false,
+              "aot":              true,
+              "extractLicenses":  true,
+              "vendorChunk":      false,
+              "buildOptimizer":   true,
               "fileReplacements": [
                 {
                   "replace": "src/renderer/environments/environment.ts",
-                  "with": "src/renderer/environments/environment.prod.ts"
-                }
-              ]
-            },
-            "web": {
-              "optimization": false,
-              "outputHashing": "none",
-              "sourceMap": true,
-              "namedChunks": false,
-              "aot": false,
-              "extractLicenses": true,
-              "vendorChunk": false,
-              "buildOptimizer": false,
-              "fileReplacements": [
-                {
-                  "replace": "src/renderer/environments/environment.ts",
-                  "with": "src/renderer/environments/environment.web.ts"
-                }
-              ]
-            },
-            "web-production": {
-              "optimization": true,
-              "outputHashing": "all",
-              "sourceMap": false,
-              "namedChunks": false,
-              "aot": true,
-              "extractLicenses": true,
-              "vendorChunk": false,
-              "buildOptimizer": true,
-              "fileReplacements": [
-                {
-                  "replace": "src/renderer/environments/environment.ts",
-                  "with": "src/renderer/environments/environment.web.prod.ts"
+                  "with":    "src/renderer/environments/environment.prod.ts"
                 }
               ]
             }
           }
         },
         "serve": {
-          "builder": "@angular-builders/custom-webpack:dev-server",
-          "options": {
+          "builder":        "@angular-builders/custom-webpack:dev-server",
+          "options":        {
             "browserTarget": "np-document-filler:build"
           },
           "configurations": {
-            "dev": {
+            "dev":        {
               "browserTarget": "np-document-filler:build:dev"
             },
             "production": {
               "browserTarget": "np-document-filler:build:production"
-            },
-            "web": {
-              "browserTarget": "np-document-filler:build:web"
-            },
-            "web-production": {
-              "browserTarget": "np-document-filler:build:web-production"
             }
           }
         }

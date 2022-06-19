@@ -25,8 +25,23 @@ Thankfully based on (electron v17 / angular v13 template): [maximegris/angular-e
 
 # IMPROVEMENT IDEAS
 * typing could be better
-* save a set of export settings
-* 
+
+# Config file
+
+You can use a config file ".npconfig" in the "exe's" path that contains an IAppConfig json
+
+```
+{
+  PDFTK_EXE?: string;
+  ENCODING?: string;
+  DATA_PATH?: string;
+  TMP_PATH?: string;
+  CACHE_PATH?: string;
+  OUTPUT_PATH?: string;
+  DB_FILE?: string;
+  PROFILE_FILE?: string;
+}
+```
 
 # Environment variables
 
