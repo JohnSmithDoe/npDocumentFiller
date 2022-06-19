@@ -1,30 +1,9 @@
 # Introduction
 
-This app manages a small amount of documents that need to be filled and bundled.
-It helps to fill documents like pdf forms and xlsx files with data.
-- You can setup document links to original files 
-- You can map fields or cells to custom field names
-- Fields with the same name get the same value
-- You can create a copy of all documents with the filled in values
-
-Depends on pdftk to be available on your system.
-It is only roughly tested on Windows and has a german UI.
-
-Thankfully based on (electron v17 / angular v13 template): [maximegris/angular-electron](https://github.com/maximegris/angular-electron)
-
-# ISSUES
-
-### ISSUE #1: How to get the encoding of a file instead of assuming utf8 || win1252
-- To get the encoding of a file we need to "guess" from the header and encoded chars e.g. [jschardet](https://github.com/aadsm/jschardet)
-- This is too much for now so we go with win1252 and utf8 only
-
-### ISSUE #2: To add npm packages to the main app we have to add them to both package.jsons
-- Maybe its not a good idea to keep the main in the src folder
-- Do peerDependencies get installed ... probably not
-  - If not just copy the peerDependencies to the normal dependencies
-
-# IMPROVEMENT IDEAS
-* typing could be better
+This branch contains a prebuild setup.exe file.
+After you installed the software with this setup.
+Go to the installation folder and add the config file.
+Set at least the PDFTK_EXE for now.
 
 # Config file
 
