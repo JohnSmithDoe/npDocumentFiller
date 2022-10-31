@@ -1,5 +1,5 @@
 {
-  "name":         "npdocumentfiller",
+  "name":         "np-fill-in-helper",
   "version":      "1.0.0",
   "description":  "Copy and fill xlsx and pdf documents with the same input data",
   "main":         "main.js",
@@ -16,7 +16,7 @@
     "angular"
   ],
   "author":       "leto the c0dem0nkey",
-  "license":      "MIT",
+  "license":      "gpl v2",
   "bugs":         {
     "url": "https://github.com/JohnSmithDoe/npDocumentFiller/issues"
   },

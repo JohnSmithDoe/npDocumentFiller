@@ -10,8 +10,8 @@ import {PdfService} from './pdf/pdf.service';
 import {showFilePickerSync} from './utils/electron.utils';
 import {startWithExpolorer} from './utils/shell.utils';
 
-const args  = process.argv.slice(1),
-      debug = args.some(val => val === '--npdebug');
+const args = process.argv.slice(1),
+  debug = args.some(val => val === '--npdebug');
 
 const npConfigFile = path.resolve('./.npconfig');
 
@@ -19,7 +19,9 @@ let npConfig: IAppConfig = {};
 try {
   const npConfigContent = fs.readFileSync(npConfigFile, {encoding: 'utf8'});
   npConfig = JSON.parse(npConfigContent);
-} catch (e) { }
+} catch (e) {
+  console.error(e);
+}
 
 const dataPath = npConfig.DATA_PATH || process.env.APP_DATA || path.resolve('./data');
 const tmpPath = npConfig.TMP_PATH || process.env.APP_TEMP || path.join(dataPath, 'tmp');
@@ -35,6 +37,20 @@ const encoding = npConfig.ENCODING || process.env.APP_ENCODING || (process.platf
 
 if (debug) {
   console.log(npConfig, pdftk);
+  try {
+    npConfig.DATA_PATH = dataPath;
+    npConfig.TMP_PATH = tmpPath;
+    npConfig.CACHE_PATH = cachePath;
+    npConfig.OUTPUT_PATH = outputPath;
+    npConfig.DB_FILE = dataFile;
+    npConfig.PROFILE_FILE = profileFile;
+    npConfig.PDFTK_EXE = pdftk;
+    npConfig.ENCODING = encoding;
+    const content = JSON.stringify(npConfig);
+    fs.writeFileSync(npConfigFile, content, {encoding: 'utf8'});
+  } catch (e) {
+    console.error(e);
+  }
 }
 
 export class NpAssistant {
@@ -46,7 +62,7 @@ export class NpAssistant {
   constructor(private readonly mainWindow: BrowserWindow) {
     this.database = NpAssistant.readDatabase();
     this.api = new ApiController(this);
-    if(!fs.existsSync(pdftk)){
+    if (!fs.existsSync(pdftk)) {
       throw new Error('Es muss das PDFToolkit installiert sein. https://www.pdflabs.com/tools/pdftk-the-pdf-toolkit/. Falls Du dies schon installiert hast lege bitte eine .npconfig Datei mit dem passenden schema an.')
     }
     this.pdf = new PdfService(pdftk, encoding);
@@ -188,7 +204,16 @@ export class NpAssistant {
     if (!sheets) {
       throw new Error('No Worksheets found');
     }
-    this.database[filename] = {id: uuidv4(), name: basename, filename, sheets, mapped: [], export: true, type: 'xlsx', mtime: mtimeMs} as IXlsxDocument;
+    this.database[filename] = {
+      id: uuidv4(),
+      name: basename,
+      filename,
+      sheets,
+      mapped: [],
+      export: true,
+      type: 'xlsx',
+      mtime: mtimeMs
+    } as IXlsxDocument;
     NpAssistant.removeTempCopy(tmpCopy);
   }
 
@@ -211,7 +236,17 @@ export class NpAssistant {
     NpAssistant.removeTempCopy(fdfFile);
     NpAssistant.removeTempCopy(filename);
 
-    this.database[filename] = {id: uuidv4(), name: basename, filename, fields, mapped: [], export: true, type: 'pdf', mtime: mtimeMs, previewfile} as IPdfDocument;
+    this.database[filename] = {
+      id: uuidv4(),
+      name: basename,
+      filename,
+      fields,
+      mapped: [],
+      export: true,
+      type: 'pdf',
+      mtime: mtimeMs,
+      previewfile
+    } as IPdfDocument;
 
     startWithExpolorer(previewfile);
   }
@@ -252,7 +287,14 @@ export class NpAssistant {
       } else if (type === 'xlsx') {
         await this.addNewXlsxTemplate(filename, basename, basenameNoExt, mtimeMs);
       } else {
-        this.database[filename] = {id: uuidv4(), name: basename, filename, export: true, type: 'resource', mtime: mtimeMs};
+        this.database[filename] = {
+          id: uuidv4(),
+          name: basename,
+          filename,
+          export: true,
+          type: 'resource',
+          mtime: mtimeMs
+        };
       }
       NpAssistant.writeDatabase(this.database);
     } else {
