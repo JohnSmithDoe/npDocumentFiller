@@ -16,7 +16,6 @@ interface IDocument<T = TTemplateType> {
   name: string;
   filename: string;
   mtime: number;
-  export?: boolean;
   type: T;
 }
 
@@ -35,19 +34,24 @@ export interface IPdfDocument extends IMappedDocument<'pdf'> {
 
 export interface IMappedField {
   origId: string;
-  name: string;
   mappedName: string;
-  export?: boolean;
-
 }
 
 export interface IMappedInput {
   identifiers: string[];
   value: string;
 }
+export interface IProfile {
+  id: string;
+  name: string;
+  documentIds: string [];
+  fieldIds: string [];
+}
 
-
-export type TAppDatabase = { [key: string]: IMappedDocument };
+export interface IClientData {
+  documents: IMappedDocument[];
+  profiles: IProfile[];
+}
 
 export enum EAppChannels {
   GET           = 'get-templates',
@@ -66,14 +70,4 @@ export enum EAppChannels {
   CLIENT_ERROR  = 'client-error',
 }
 
-export interface IProfile {
-  id: string;
-  name: string;
-  documentIds: string [];
-  fieldIds: string [];
-}
 
-export interface IInitialData {
-  documents: IMappedDocument[];
-  profiles: IProfile[];
-}

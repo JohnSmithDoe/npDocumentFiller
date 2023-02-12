@@ -46,7 +46,7 @@
 
   <mat-form-field>
     <mat-label>Eigene Bezeichnung</mat-label>
-    <input matInput [(ngModel)]="current.name" (ngModelChange)="updateFilter($event)" type="text" placeholder="Eigene Feldbezeichnung" [matAutocomplete]="auto">
+    <input matInput [(ngModel)]="current.mappedName" (ngModelChange)="updateFilter($event)" type="text" placeholder="Eigene Feldbezeichnung" [matAutocomplete]="auto">
     <mat-autocomplete #auto="matAutocomplete">
       <mat-option *ngFor="let option of filteredNames$ | async" [value]="option">
         {{option}}

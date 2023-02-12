@@ -1,18 +1,18 @@
 import {EventEmitter, Injectable} from '@angular/core';
 import {ipcRenderer} from 'electron';
-import {EAppChannels, IInitialData, IMappedDocument, IMappedInput, IProfile} from '../../../bridge/shared.model';
+import {EAppChannels, IClientData, IMappedDocument, IMappedInput, IProfile} from '../../../bridge/shared.model';
 import IpcRendererEvent = Electron.IpcRendererEvent;
 
 @Injectable({
-              providedIn: 'root'
-            })
+  providedIn: 'root'
+})
 export class ElectronService {
 
   public startRequest$: EventEmitter<EAppChannels> = new EventEmitter<EAppChannels>();
   public stopRequest$: EventEmitter<EAppChannels> = new EventEmitter<EAppChannels>();
 
-  public update$: EventEmitter<IMappedDocument[]> = new EventEmitter<IMappedDocument[]>();
-  public finishedLoading$: EventEmitter<IInitialData | undefined> = new EventEmitter<IInitialData | undefined>();
+  public update$: EventEmitter<IClientData> = new EventEmitter<IClientData>();
+  public finishedLoading$: EventEmitter<IClientData | undefined> = new EventEmitter<IClientData | undefined>();
   public error$: EventEmitter<string[]> = new EventEmitter<string[]>();
   public report$: EventEmitter<string[]> = new EventEmitter<string[]>();
 
@@ -22,16 +22,16 @@ export class ElectronService {
     // Conditional imports
     if (this.isElectron) {
       this.ipcRenderer = window.require('electron').ipcRenderer;
-      this.ipcRenderer.on(EAppChannels.FINISHED_LOAD, (event: IpcRendererEvent, data: IInitialData) => {
+      this.ipcRenderer.on(EAppChannels.FINISHED_LOAD, (event: IpcRendererEvent, data: IClientData) => {
         this.stopRequest$.emit(EAppChannels.FINISHED_LOAD);
         this.finishedLoading$.emit(data);
       });
-      this.ipcRenderer.on(EAppChannels.CLIENT_UPDATE, (event: IpcRendererEvent, data: IMappedDocument[] | string[] | undefined) => {
-        if (data && data.length) {
-          if (typeof data[0] === 'string') {
-            this.report$.emit(data as string[]);
+      this.ipcRenderer.on(EAppChannels.CLIENT_UPDATE, (event: IpcRendererEvent, data: IClientData | string[] | undefined) => {
+        if (data) {
+          if (data.hasOwnProperty('documents')) {
+            this.update$.emit(data as IClientData);
           } else {
-            this.update$.emit(data as IMappedDocument[]);
+            this.report$.emit(data as string[]);
           }
         }
       });
@@ -58,7 +58,9 @@ export class ElectronService {
     return !!(window && window.process && window.process.type);
   }
 
-  private get renderer() { return this.isElectron ? this.ipcRenderer : undefined;}
+  private get renderer() {
+    return this.isElectron ? this.ipcRenderer : undefined;
+  }
 
   private send(channel: EAppChannels, ...data: any) {
     console.log('Send on channel: ', channel);
@@ -74,8 +76,8 @@ export class ElectronService {
     this.send(EAppChannels.GET);
   }
 
-  addFileTemplate() {
-    this.send(EAppChannels.ADD);
+  addFileTemplate(autoMap: boolean) {
+    this.send(EAppChannels.ADD, autoMap);
   }
 
   save(data: IMappedDocument) {
@@ -94,14 +96,15 @@ export class ElectronService {
     this.send(EAppChannels.OPEN_OUTPUT, folder);
   }
 
-  createDocuments(exportFolder: string, exportedFields: IMappedInput[]) {
+  createDocuments(exportFolder: string, exportDocumentIds: string[], exportedFields: IMappedInput[]) {
     this.send(EAppChannels.EXPORT,
-              exportFolder,
-              exportedFields.map(({identifiers, value, ...field}) => ({identifiers, value})));
+      exportFolder,
+      exportDocumentIds,
+      exportedFields.map(({identifiers, value, ...field}) => ({identifiers, value})));
   }
 
   removeDocument(template: IMappedDocument) {
-    this.send(EAppChannels.REMOVE, template.filename);
+    this.send(EAppChannels.REMOVE, template.id);
   }
 
   saveProfile(profiles: IProfile[]) {
@@ -109,6 +112,6 @@ export class ElectronService {
   }
 
   remapFileTemplate(doc: IMappedDocument) {
-    this.send(EAppChannels.REMAP, doc.filename);
+    this.send(EAppChannels.REMAP, doc.id);
   }
 }

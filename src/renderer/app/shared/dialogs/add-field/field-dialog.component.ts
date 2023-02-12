@@ -4,6 +4,7 @@ import {MAT_DIALOG_DATA, MatDialogRef} from '@angular/material/dialog';
 import {Observable} from 'rxjs';
 import {map, startWith} from 'rxjs/operators';
 import {IMappedField} from '../../../../../bridge/shared.model';
+import {TUIDocumentField} from "../../../home/home.component";
 
 @Component({
              selector:    'app-field-dialog',
@@ -12,7 +13,7 @@ import {IMappedField} from '../../../../../bridge/shared.model';
            })
 export class FieldDialogComponent implements OnInit {
   current = {
-    name:   '',
+    mappedName:   '',
     id:     '',
     column: '',
     row:    undefined,
@@ -50,12 +51,11 @@ export class FieldDialogComponent implements OnInit {
     //   : `$${this.current.id}.${this.current.column}${this.current.row}`;
     const orig = this.data.possibleFields.find(field => field.id === this.current.id);
     const mappedName = this.data.type === 'pdf'
-      ?  orig.name
+      ?  this.current.mappedName
       : `$${orig.name}.${this.current.column}${this.current.row}`;
 
-    const mappedField: IMappedField = {
+    const mappedField: TUIDocumentField = {
       origId: this.current.id,
-      name:   this.current.name,
       export: true,
       mappedName
     };
@@ -80,7 +80,7 @@ export class FieldDialogComponent implements OnInit {
   }
 
   isValid() {
-    if(!this.data || !this.current.id || !this.current.name.length) return false;
+    if(!this.data || !this.current.id || !this.current.mappedName.length) return false;
     if(this.data.type === 'pdf') return true;
     return !this.isDuplicated();
   }
@@ -92,6 +92,6 @@ export class FieldDialogComponent implements OnInit {
   fieldChosen(id: string) {
     const orig = this.data.possibleFields.find(field => field.id === id);
     if(!orig) return false;
-    this.current.name = orig.name;
+    this.current.mappedName = orig.name;
   }
 }

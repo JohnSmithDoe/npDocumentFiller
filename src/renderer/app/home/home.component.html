@@ -2,20 +2,28 @@
   <mat-toolbar>
     <b>Vorlagen verwalten</b>
     <span class="toolbar-spacer"></span>
+    <mat-checkbox [(ngModel)]="options.autoMapFields"
+                  matTooltip="Auto-Mapping der Felder" aria-label="Auto map the imported form"
+                  color="accent"
+                  style="margin-right: .5rem"
+    >
+    </mat-checkbox>
     <button mat-flat-button class="btn-success" (click)="addFileTemplate()">
       <mat-icon>add</mat-icon>
       Vorlage hinzufügen
     </button>
   </mat-toolbar>
-
   <mat-toolbar>
-    <mat-select [(ngModel)]="profileId" (closed)="changedProfile()"
-
-                placeholder="Export Profil" [disabled]="!profiles.length" style="max-width: 160px; margin: 0 1rem 0 0">
+    <mat-select [(ngModel)]="profileId" (closed)="changedProfile()" placeholder="Export Profil" [disabled]="!profiles.length" style="margin: 0 0 .3rem 0">
+      <mat-option [value]="''">
+        Kein Export Profil
+      </mat-option>
       <mat-option *ngFor="let aprofile of profiles; let index=index" [value]="aprofile.id">
         {{aprofile.name}}
       </mat-option>
     </mat-select>
+  </mat-toolbar>
+  <mat-toolbar>
     <button mat-icon-button (click)="addProfile()" [disabled]="!dataSource.length" matTooltip="Neues Export Profil anlegen" aria-label="add an export profile">
       <mat-icon>add</mat-icon>
     </button>
@@ -36,7 +44,7 @@
     <mat-expansion-panel *ngFor="let doc of dataSource">
       <mat-expansion-panel-header>
         <mat-panel-title>
-          <mat-checkbox class="max-label" [(ngModel)]="doc.export" (click)="$event.stopPropagation()" (ngModelChange)="changedDocument(doc)"
+          <mat-checkbox class="max-label" [(ngModel)]="doc.export" (click)="$event.stopPropagation()" (ngModelChange)="changedExportOnDocument()"
                         matTooltip="{{doc.name}}" aria-label="Export the selected document"
                         color="primary"
           >{{doc.name}}</mat-checkbox>
@@ -68,12 +76,12 @@
       <div class="field-container" *ngFor="let node of (doc.mapped || [])">
         <mat-form-field class="no-padding">
           <mat-label>{{node.mappedName}}</mat-label>
-          <input matInput [(ngModel)]="node.name" type="text" placeholder="{{node.mappedName}}" (ngModelChange)="changingName()" (blur)="blurNameInput(node)">
+          <input matInput [(ngModel)]="node.mappedName" type="text" placeholder="{{node.mappedName}}" (ngModelChange)="changingName()" (blur)="blurNameInput(node)">
         </mat-form-field>
-        <button (click)="showConfirmDialog(null,node, null, $event)" color="warn" mat-icon-button matTooltip="Dokument entfernen" aria-label="Remove the selected document">
+        <button (click)="showConfirmDialog(null,node, null, $event)" color="warn" mat-icon-button matTooltip="Feld entfernen" aria-label="Remove the selected field">
           <mat-icon class="mat-icon-rtl-mirror">delete</mat-icon>
         </button>
-        <mat-checkbox color="primary" [(ngModel)]="node.export" (ngModelChange)="changedField(node)">Exportieren &nbsp;</mat-checkbox>
+        <mat-checkbox color="primary" [(ngModel)]="node.export" (ngModelChange)="changedExportOnField()">Exportieren &nbsp;</mat-checkbox>
       </div>
       <ng-container *ngIf="!doc.mapped">
         <p class="no-add">Diese Vorlage kann nur kopiert werden.</p>
@@ -109,7 +117,7 @@
 
 <main class="right">
   <mat-toolbar>
-    <button mat-flat-button (click)="createDocuments()" color="warn" [disabled]="!exportMsgs.length">
+    <button mat-flat-button (click)="createDocuments()" color="warn" [disabled]="!export.msgs.length">
       <mat-icon>save_as</mat-icon>
       Dokumente erstellen
     </button>
@@ -117,32 +125,32 @@
     <b>Unterlagen erstellen</b>
   </mat-toolbar>
   <mat-toolbar>
-    <input matInput [(ngModel)]="exportSuffix" type="text" placeholder="Export Ordner Suffix" class="suffix-input" (ngModelChange)="updateExportFolder()">
+    <input matInput [(ngModel)]="export.suffix" type="text" placeholder="Export Ordner Suffix" class="suffix-input" (ngModelChange)="updateExport()">
     <span class="toolbar-spacer"></span>
     <button mat-icon-button (click)="openOutputFolder()" matTooltip="Ausgabe Ordner öffnen">
       <mat-icon>open_in_new</mat-icon>
     </button>
   </mat-toolbar>
-  <mat-list *ngIf="!!exportMsgs.length">
+  <mat-list *ngIf="!!export.msgs.length">
     <h4>Folgende Unterlagen werden erstellt</h4>
-    <mat-list-item class="list-item" *ngFor="let msg of exportMsgs">
+    <mat-list-item class="list-item" *ngFor="let msg of export.msgs">
       <li [innerHtml]="msg"></li>
     </mat-list-item>
 
     <h4>Werte die in die Unterlagen eingefügt werden</h4>
-    <div *ngFor="let field of exportedFields" style="margin-bottom: 1rem">
+    <div *ngFor="let field of export.fields" style="margin-bottom: 1rem">
       <mat-form-field>
-        <mat-label>{{field.name}}</mat-label>
-        <input matInput [(ngModel)]="field.value" type="text" placeholder="{{field.name}}">
+        <mat-label>{{field.mappedName}}</mat-label>
+        <input matInput [(ngModel)]="field.value" type="text" placeholder="{{field.mappedName}}">
         <mat-hint><small><strong>Verwendet in: </strong>{{field.info}}</small></mat-hint>
       </mat-form-field>
     </div>
   </mat-list>
 
-  <mat-card *ngIf="exportMsgs.length && !exportedFields.length && !!dataSource?.length" class="warn-card">
+  <mat-card *ngIf="export.msgs.length && !!dataSource?.length" class="warn-card">
     Es wurden noch keine Felder für den export ausgewählt.
   </mat-card>
-  <mat-card *ngIf="!exportMsgs.length && !exportedFields.length && !!dataSource?.length" class="warn-card">
+  <mat-card *ngIf="!export.msgs.length && !!dataSource?.length" class="warn-card">
     <mat-card-header>
       <mat-card-subtitle>
         Wähle zuerst mindestens eine Dokumentenvorlage für den Export aus
