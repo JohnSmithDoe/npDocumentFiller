@@ -1,3 +1,4 @@
+export const APP_VERSION = 'v1.1.7';
 export interface IAppConfig {
   PDFTK_EXE?: string;
   ENCODING?: string;
@@ -28,7 +29,7 @@ export interface IXlsxDocument extends IMappedDocument<'xlsx'> {
 }
 
 export interface IPdfDocument extends IMappedDocument<'pdf'> {
-  fields: { id: string, name: string }[];
+  fields: { id: string, path: string }[];
   previewfile: string;
 }
 
@@ -48,9 +49,16 @@ export interface IProfile {
   fieldIds: string [];
 }
 
+export interface IClientReportData {
+  headline: string;
+  messages: string[];
+  messageFolder?: string;
+}
+
 export interface IClientData {
   documents: IMappedDocument[];
   profiles: IProfile[];
+  message: IClientReportData;
 }
 
 export enum EAppChannels {

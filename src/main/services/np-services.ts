@@ -40,5 +40,10 @@ export abstract class NPService implements INPService {
       mtime: stats.mtimeMs
     };
   }
-
+  async remapDocument(original: IMappedDocument, newfilename: string) {
+    const {basename, mtimeMs} = getFileStats(newfilename);
+    original.filename = newfilename;
+    original.name = basename;
+    original.mtime = mtimeMs;
+  }
 }

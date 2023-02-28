@@ -29,6 +29,10 @@ export function  getFileStats(filename: string): { basename: string, basenameNoE
   return {...getFileInfo(filename), mtimeMs};
 }
 
+export function getFilesFromFolderSync(foldername: string){
+  return fs.readdirSync(foldername);
+}
+
 export function  createAndValidateFolder(outputFolder: string) {
   let result: string[] = [];
   let valid = true;

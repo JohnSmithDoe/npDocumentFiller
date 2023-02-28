@@ -1,26 +1,26 @@
 import {ipcMain, IpcMainEvent} from 'electron';
-import {EAppChannels, IAppConfig, IMappedDocument, IMappedInput, IProfile} from '../bridge/shared.model';
+import {EAppChannels, IAppConfig, IClientData, IMappedDocument, IMappedInput, IProfile} from '../bridge/shared.model';
 import {NpAssistant} from './np-assistant';
 import {startWithExpolorer} from "./utils/shell.utils";
 import * as path from "path";
 import * as fs from "fs";
 
 type TApiDescription = {
-  [key in EAppChannels]: (event: IpcMainEvent, ...args: any[]) => void
+  [key in EAppChannels]: (event: IpcMainEvent, ...args: any[]) => IClientData | Promise<IClientData> | false
 };
 
 export class ApiController {
 
   private api: Omit<TApiDescription, EAppChannels.CLIENT_UPDATE | EAppChannels.CLIENT_ERROR | EAppChannels.FINISHED_LOAD> = {
-    [EAppChannels.GET]: (event: IpcMainEvent) => this.npAssistant.getClientData(true, false).documents,
-    [EAppChannels.REMOVE]: (event: IpcMainEvent, id: string) => this.npAssistant.removeDocument(id),
+    [EAppChannels.GET]: (event: IpcMainEvent) => this.npAssistant.getClientData(true, false),
+    [EAppChannels.REMOVE]: (event: IpcMainEvent, id: string, everything?: boolean) => this.npAssistant.removeDocument(id, everything),
     [EAppChannels.OPEN]: (event: IpcMainEvent, filename: string) => startWithExpolorer(filename),
     [EAppChannels.OPEN_OUTPUT]: (event: IpcMainEvent, folder: string) => this.openOutputFolderWithExplorer(folder),
-    [EAppChannels.ADD]: (event: IpcMainEvent, autoMapFields?: boolean) => this.npAssistant.addDocument(!!autoMapFields),
+    [EAppChannels.ADD]: (event: IpcMainEvent, autoMapFields?: boolean, folder?: boolean) => this.npAssistant.addDocuments(!!autoMapFields, !!folder),
     [EAppChannels.REMAP]: (event: IpcMainEvent, id: string) => this.npAssistant.remapDocument(id),
     [EAppChannels.SAVE]: (event: IpcMainEvent, document: IMappedDocument) => this.npAssistant.updateDocument(document),
     [EAppChannels.EXPORT]: (event: IpcMainEvent, exportFolder: string, exportDocuments: string[], exportFields: IMappedInput[]) => this.npAssistant.createDocuments(exportFolder, exportDocuments, exportFields),
-    [EAppChannels.GET_PROFILES]: (event: IpcMainEvent) => this.npAssistant.getClientData(false, true).profiles,
+    [EAppChannels.GET_PROFILES]: (event: IpcMainEvent) => this.npAssistant.getClientData(false, true),
     [EAppChannels.SAVE_PROFILES]: (event: IpcMainEvent, profiles: IProfile[]) => this.npAssistant.updateProfiles(profiles),
 
   };
@@ -40,13 +40,13 @@ export class ApiController {
   }
 
   // -------------------------- Sync --------------------------------------------
-  private openOutputFolderWithExplorer(folder: string): void {
-    const outputFolder = path.join(this.config.OUTPUT_PATH, folder);
-    if (!fs.existsSync(outputFolder)) {
-      startWithExpolorer(this.config.OUTPUT_PATH);
+  private openOutputFolderWithExplorer(folder: string): false {
+    if (fs.existsSync(folder)) {
+      startWithExpolorer(folder);
     } else {
-      startWithExpolorer(outputFolder);
+      startWithExpolorer(this.config.OUTPUT_PATH);
     }
+    return false;
   }
 
 }

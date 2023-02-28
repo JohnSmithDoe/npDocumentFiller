@@ -4,7 +4,7 @@
     <mat-label>Feld aus der Vorlage</mat-label>
     <mat-select [(ngModel)]="current.id" (ngModelChange)="fieldChosen($event)">
       <mat-option *ngFor="let field of data.possibleFields; let index=index" [value]="field.id"  [disabled]="field.disabled">
-        {{field.name}}
+        {{field.path}}
       </mat-option>
     </mat-select>
     <mat-hint>Der Feldname aus der pdf Vorlage</mat-hint>
@@ -18,7 +18,7 @@
         <mat-label>Arbeitsmappe</mat-label>
         <mat-select [(ngModel)]="current.id" placeholder="Die Arbeitsmappe der Zelle">
           <mat-option *ngFor="let field of data.possibleFields" [value]="field.id">
-            {{field.name}}
+            {{field.path}}
           </mat-option>
         </mat-select>
         <mat-hint>Die Arbeitsmappe aus der xlsx Vorlage</mat-hint>

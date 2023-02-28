@@ -2,15 +2,30 @@
   <mat-toolbar>
     <b>Vorlagen verwalten</b>
     <span class="toolbar-spacer"></span>
+    <mat-checkbox [(ngModel)]="options.visible"
+                  matTooltip="Optionen einblenden" aria-label="show options"
+                  color="accent"
+                  style="margin-right: .5rem"
+    >
+    </mat-checkbox>
+    <button mat-flat-button class="btn-success" style="margin-right: .5rem" (click)="addFileTemplate()" matTooltip="Einzelne Datei hinzufügen">
+      <mat-icon>upload_file</mat-icon>
+    </button>
+    <button mat-flat-button class="btn-success" (click)="addFileTemplates()" matTooltip="Ganzen Ordner hinzufügen">
+      <mat-icon>drive_folder_upload</mat-icon>
+    </button>
+  </mat-toolbar>
+  <mat-toolbar *ngIf="options.visible">
     <mat-checkbox [(ngModel)]="options.autoMapFields"
                   matTooltip="Auto-Mapping der Felder" aria-label="Auto map the imported form"
                   color="accent"
                   style="margin-right: .5rem"
     >
+      Auto-Mapping
     </mat-checkbox>
-    <button mat-flat-button class="btn-success" (click)="addFileTemplate()">
-      <mat-icon>add</mat-icon>
-      Vorlage hinzufügen
+    <span class="toolbar-spacer"></span>
+    <button mat-flat-button class="btn-warn" style="margin-right: .5rem" (click)="resetApp()" matTooltip="Programm zurücksetzen">
+      <mat-icon>gpp_bad</mat-icon> System Reset
     </button>
   </mat-toolbar>
   <mat-toolbar>
@@ -44,7 +59,7 @@
     <mat-expansion-panel *ngFor="let doc of dataSource">
       <mat-expansion-panel-header>
         <mat-panel-title>
-          <mat-checkbox class="max-label" [(ngModel)]="doc.export" (click)="$event.stopPropagation()" (ngModelChange)="changedExportOnDocument()"
+          <mat-checkbox class="max-label" [(ngModel)]="doc.export" (click)="$event.stopPropagation()" (ngModelChange)="changedExportOnDocument(doc)"
                         matTooltip="{{doc.name}}" aria-label="Export the selected document"
                         color="primary"
           >{{doc.name}}</mat-checkbox>
@@ -146,10 +161,6 @@
       </mat-form-field>
     </div>
   </mat-list>
-
-  <mat-card *ngIf="export.msgs.length && !!dataSource?.length" class="warn-card">
-    Es wurden noch keine Felder für den export ausgewählt.
-  </mat-card>
   <mat-card *ngIf="!export.msgs.length && !!dataSource?.length" class="warn-card">
     <mat-card-header>
       <mat-card-subtitle>

@@ -6,7 +6,8 @@ import * as child_process from 'child_process';
  * By supplying a (dummy) window title * - "" - explicitly,
  * the 2nd argument is reliably interpreted as the target executable / document path.
  */
-export function startWithExpolorer(filename: string) {
+export function startWithExpolorer(filename: string): false {
   child_process.exec(`start "" "${filename}"`);
+  return false;
 }
 

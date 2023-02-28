@@ -4,30 +4,30 @@ import {app, BrowserWindow} from 'electron';
 import * as fs from 'fs';
 import * as path from 'path';
 import * as url from 'url';
-import {EAppChannels, IClientData} from '../bridge/shared.model';
+import {APP_VERSION, EAppChannels, IClientData} from '../bridge/shared.model';
 import {NpAssistant} from './np-assistant';
 
 let win: BrowserWindow = null;
-const args  = process.argv.slice(1),
-      serve = args.some(val => val === '--serve');
+const args = process.argv.slice(1),
+  serve = args.some(val => val === '--serve');
 
 function createWindow(): void {
 
   // Create the browser window.
   win = new BrowserWindow({
-                            frame:           true,
-                            autoHideMenuBar: true,
-                            width:           1024,
-                            height:          800,
-                            backgroundColor: '#fafafa',
-                            center:          true,
-                            webPreferences:  {
-                              nodeIntegration:             true,
-                              allowRunningInsecureContent: serve,
-                              contextIsolation:            false,
-                              devTools:                    serve,
-                            },
-                          });
+    frame: true,
+    autoHideMenuBar: true,
+    width: 1024,
+    height: 800,
+    backgroundColor: '#fafafa',
+    center: true,
+    webPreferences: {
+      nodeIntegration: true,
+      allowRunningInsecureContent: serve,
+      contextIsolation: false,
+      devTools: serve,
+    },
+  });
 
   let indexUrl = 'http://localhost:4200';
   if (serve) {
@@ -44,10 +44,10 @@ function createWindow(): void {
 
     // noinspection JSDeprecatedSymbols
     indexUrl = url.format({
-                                pathname: path.join(__dirname, pathIndex),
-                                protocol: 'file:',
-                                slashes:  true,
-                              });
+      pathname: path.join(__dirname, pathIndex),
+      protocol: 'file:',
+      slashes: true,
+    });
   }
 
   let assistant: NpAssistant;
@@ -59,12 +59,15 @@ function createWindow(): void {
     win = null;
   });
 
-  win.webContents.on('did-fail-load', (event,errorCode, errorDesc, validatedURL, isMain) => {
+  win.webContents.on('did-fail-load', (event, errorCode, errorDesc, validatedURL, isMain) => {
     win.loadURL(indexUrl); // REDIRECT TO FIRST WEBPAGE AGAIN
   });
-  win.webContents.on('did-finish-load', (event,errorCode, errorDesc, validatedURL, isMain) => {
-    if(assistant){
-      const initialData: IClientData = assistant.getClientData(true, true)
+  win.webContents.on('did-finish-load', (event, errorCode, errorDesc, validatedURL, isMain) => {
+    if (assistant) {
+      const initialData: IClientData = assistant.getClientData(true, true, {
+        headline: 'Willkommen in npAusfüllhilfe',
+        messages: ['Version: ' + APP_VERSION]
+      })
       event.sender.send(EAppChannels.FINISHED_LOAD, initialData);
     }
   });

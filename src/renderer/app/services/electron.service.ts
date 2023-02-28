@@ -1,6 +1,13 @@
 import {EventEmitter, Injectable} from '@angular/core';
 import {ipcRenderer} from 'electron';
-import {EAppChannels, IClientData, IMappedDocument, IMappedInput, IProfile} from '../../../bridge/shared.model';
+import {
+  EAppChannels,
+  IClientData,
+  IClientReportData,
+  IMappedDocument,
+  IMappedInput,
+  IProfile
+} from '../../../bridge/shared.model';
 import IpcRendererEvent = Electron.IpcRendererEvent;
 
 @Injectable({
@@ -8,13 +15,13 @@ import IpcRendererEvent = Electron.IpcRendererEvent;
 })
 export class ElectronService {
 
-  public startRequest$: EventEmitter<EAppChannels> = new EventEmitter<EAppChannels>();
-  public stopRequest$: EventEmitter<EAppChannels> = new EventEmitter<EAppChannels>();
+  public startRequest$ = new EventEmitter<EAppChannels>();
+  public stopRequest$ = new EventEmitter<EAppChannels>();
 
-  public update$: EventEmitter<IClientData> = new EventEmitter<IClientData>();
-  public finishedLoading$: EventEmitter<IClientData | undefined> = new EventEmitter<IClientData | undefined>();
-  public error$: EventEmitter<string[]> = new EventEmitter<string[]>();
-  public report$: EventEmitter<string[]> = new EventEmitter<string[]>();
+  public update$ = new EventEmitter<IClientData>();
+  public finishedLoading$ = new EventEmitter<IClientData | undefined>();
+  public error$ = new EventEmitter<string[]>();
+  public report$ = new EventEmitter<IClientReportData>();
 
   private readonly ipcRenderer: typeof ipcRenderer;
 
@@ -26,13 +33,12 @@ export class ElectronService {
         this.stopRequest$.emit(EAppChannels.FINISHED_LOAD);
         this.finishedLoading$.emit(data);
       });
-      this.ipcRenderer.on(EAppChannels.CLIENT_UPDATE, (event: IpcRendererEvent, data: IClientData | string[] | undefined) => {
-        if (data) {
-          if (data.hasOwnProperty('documents')) {
-            this.update$.emit(data as IClientData);
-          } else {
-            this.report$.emit(data as string[]);
-          }
+      this.ipcRenderer.on(EAppChannels.CLIENT_UPDATE, (event: IpcRendererEvent, data: IClientData | undefined) => {
+        if (data.documents || data.profiles) {
+          this.update$.emit(data);
+        }
+        if (data.message) {
+          this.report$.emit(data.message);
         }
       });
       this.ipcRenderer.on(EAppChannels.CLIENT_ERROR, (event: IpcRendererEvent, err: any) => this.error$.emit(err));
@@ -71,13 +77,11 @@ export class ElectronService {
     });
   }
 
-  // this did not work ... for timing reasons... not sure... did finish load now sends the inital data
-  getTemplates() {
-    this.send(EAppChannels.GET);
-  }
-
   addFileTemplate(autoMap: boolean) {
     this.send(EAppChannels.ADD, autoMap);
+  }
+  addFileTemplates(autoMap: boolean) {
+    this.send(EAppChannels.ADD, autoMap, true);
   }
 
   save(data: IMappedDocument) {
@@ -105,6 +109,9 @@ export class ElectronService {
 
   removeDocument(template: IMappedDocument) {
     this.send(EAppChannels.REMOVE, template.id);
+  }
+  resetApp() {
+    this.send(EAppChannels.REMOVE, -1, true);
   }
 
   saveProfile(profiles: IProfile[]) {

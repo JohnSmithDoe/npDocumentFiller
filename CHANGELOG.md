@@ -1,3 +1,9 @@
+### Version 1.1.7
+* To make redistribution and redeploy easier we added
+  * Feature - Import folder (Import a whole folder full of documents)
+  * Feature - Reset app (Reset the database)
+  * So now all documents can be removed or restored in one action (profiles not)
+  * Improved error handling
 
 ### Version 1.1.6
 * Reworked the export profiles (bugfixes)

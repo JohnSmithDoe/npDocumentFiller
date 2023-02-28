@@ -69,7 +69,7 @@ export class PdfService extends NPService {
         fdfValue.value = fdfValue.path;
         return fdfValue;
       })
-      .map(fdfValue => ({id: uuidv4(), name: fdfValue.path}));
+      .map(fdfValue => ({id: uuidv4(), path: fdfValue.path}));
     this.writeFDF(fdfFile, fdf);
     this.applyFDF(tmpCopy, fdfFile, previewfile);
     removeTempCopy(fdfFile, this.config.TMP_PATH);
@@ -78,7 +78,7 @@ export class PdfService extends NPService {
     let mapped: IMappedField[] = undefined;
     if (this.autoMapFields) {
       mapped = fields.map(field => {
-        return {origId: field.id, mappedName: field.name}
+        return {origId: field.id, mappedName: field.path}
       })
     }
 
@@ -86,21 +86,30 @@ export class PdfService extends NPService {
   }
 
   async createDocument(document: IPdfDocument, outputPath: string, inputs: IMappedInput[], outputMsgs: string[]): Promise<string> {
+
     const {tmpCopy, basename} = this.copyAndValidateOriginalToTemp(document, outputMsgs);
     const fdfFile = this.extractFDFToTemp(tmpCopy, this.config.TMP_PATH);
     const {fdf, allValues} = this.readFDF(fdfFile);
-
+    // all original ids for all documents
     const flatIds = inputs.reduce((prev, current) => {
       prev.push(...current.identifiers);
       return prev;
     }, []);
+    // original ids of mapped fields from the current document
     const fields = document.mapped.filter(field => flatIds.includes(field.origId));
+    // for each mapped field
     fields.forEach(mappedField => {
+      // get fdf field of the original field and the value of the first input that
       const origField = document.fields.find(orig => orig.id === mappedField.origId);
-      const fdfField = allValues.find(fdfValue => fdfValue.path === origField.name);
+      const fdfField = allValues.find(fdfValue => fdfValue.path === origField.path);
       const value = inputs.find(input => input.identifiers.includes(mappedField.origId))?.value;
-      if (value) {
+      if (value && fdfField) {
         fdfField.value = value;
+      }else{
+        outputMsgs.push('ACHTUNG: Das Feld ' + origField.path + ' konnte nicht gefunden werden.');
+        outputMsgs.push('Bitte prüfen Sie das Dokument: ' + document.name + ' auf Änderungen.');
+        outputMsgs.push('Entfernen Sie das Dokument gegebenenfalls aus der Software und fügen Sie es erneut hinzu.');
+        outputMsgs.push('Falls dies nicht hilft wenden Sie sich an Ihre IT');
       }
     });
 
@@ -110,5 +119,18 @@ export class PdfService extends NPService {
     removeTempCopy(fdfFile, this.config.TMP_PATH);
     removeTempCopy(tmpCopy, this.config.TMP_PATH);
     return basename;
+  }
+
+
+  async remapDocument(original: IPdfDocument, newfilename: string): Promise<void> {
+    await super.remapDocument(original, newfilename);
+    const newDocument = await this.addDocument(newfilename);
+    const newFields = newDocument.fields.filter(newField => !original.fields.find(originalField => originalField.path === newField.path));
+    const removedFields = original.fields.filter(originalField => !newDocument.fields.find(newField => originalField.path === newField.path));
+    for (const removedField of removedFields) {
+      original.fields.splice(original.fields.indexOf(removedField), 1);
+    }
+    original.fields.push(...newFields);
+    original.mapped = original.mapped.filter(mappedField => original.fields.find(originalField => originalField.id === mappedField.origId));
   }
 }

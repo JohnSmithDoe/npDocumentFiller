@@ -25,7 +25,7 @@ export class FieldDialogComponent implements OnInit {
     public dialogRef: MatDialogRef<FieldDialogComponent>,
     @Inject(MAT_DIALOG_DATA) public data: {
       type: 'pdf' | 'xlsx',
-      possibleFields: { id: string, name: string, disabled: boolean }[],
+      possibleFields: { id: string, path: string, disabled: boolean }[],
       used: IMappedField[],
       fieldNames: string[]
     },
@@ -52,7 +52,7 @@ export class FieldDialogComponent implements OnInit {
     const orig = this.data.possibleFields.find(field => field.id === this.current.id);
     const mappedName = this.data.type === 'pdf'
       ?  this.current.mappedName
-      : `$${orig.name}.${this.current.column}${this.current.row}`;
+      : `$${orig.path}.${this.current.column}${this.current.row}`;
 
     const mappedField: TUIDocumentField = {
       origId: this.current.id,
@@ -75,7 +75,7 @@ export class FieldDialogComponent implements OnInit {
   isDuplicated() {
     const orig = this.data.possibleFields.find(field => field.id === this.current.id);
     if(!orig) return false;
-    const current = `$${orig.name}.${this.current.column}${this.current.row}`;
+    const current = `$${orig.path}.${this.current.column}${this.current.row}`;
     return this.data.used.find(used => used.mappedName === current)
   }
 
@@ -92,6 +92,6 @@ export class FieldDialogComponent implements OnInit {
   fieldChosen(id: string) {
     const orig = this.data.possibleFields.find(field => field.id === id);
     if(!orig) return false;
-    this.current.mappedName = orig.name;
+    this.current.mappedName = orig.path;
   }
 }

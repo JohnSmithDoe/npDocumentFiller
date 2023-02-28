@@ -30,6 +30,13 @@ export class NpDatabase {
     return Object.values(this._database?.documents ?? {});
   }
 
+  reset() {
+    this._profiles_db.profiles = {};
+    this._database.documents = {};
+    this.writeProfilesDatabase();
+    this.writeDocumentDatabase();
+  }
+
   //<editor-fold desc="*** File handling *** ">
 
   private readDocumentDatabase() {
@@ -112,12 +119,12 @@ export class NpDatabase {
     return this.documents;
   }
 
-  updateDocument(document: IMappedDocument) {
+  updateDocument(document: IMappedDocument, forceUpdate = false) {
     if (this.documentIdExists(document.id)) {
       const original = this._database.documents[document.id];
       this._database.documents[document.id] = document;
       this.writeDocumentDatabase();
-      if(original.mapped?.length !== document.mapped?.length){
+      if(forceUpdate || (original.mapped?.length !== document.mapped?.length)){
         this.updateProfilesOnDocumentChange(document);
       }
     }
@@ -170,4 +177,5 @@ export class NpDatabase {
       return !!this.documents.find(document => !!document.mapped.find(mappedField => mappedField.origId = origId));
     }
   }
+
 }

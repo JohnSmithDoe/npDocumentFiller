@@ -49,4 +49,8 @@ export class XlsService extends NPService {
     return basename;
   }
 
+  async remapDocument(original: IXlsxDocument, newfilename: string): Promise<void> {
+    await super.remapDocument(original, newfilename);
+    throw new Error('Not implemented yet');
+  }
 }

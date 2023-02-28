@@ -5,7 +5,7 @@ import * as path from 'path';
 import {join, resolve} from 'path';
 import {
   IAppConfig,
-  IClientData,
+  IClientData, IClientReportData,
   IMappedDocument,
   IMappedInput,
   IPdfDocument, IProfile,
@@ -13,9 +13,9 @@ import {
 } from '../bridge/shared.model';
 import {ApiController} from './api';
 import {PdfService} from './services/pdf/pdf.service';
-import {showFilePickerSync} from './utils/electron.utils';
+import {showFilePickerSync, showFolderPickerSync} from './utils/electron.utils';
 import {startWithExpolorer} from './utils/shell.utils';
-import {createAndValidateFolder, getFileInfo, getFileStats} from "./utils/file.utils";
+import {createAndValidateFolder, getFileInfo, getFilesFromFolderSync, getFileStats} from "./utils/file.utils";
 import {NpDatabase} from "./services/np-database";
 import {XlsService} from "./services/xls/xls.service";
 import {ResourceService} from "./services/resource/resource.service";
@@ -87,19 +87,20 @@ export class NpAssistant {
   constructor(private readonly mainWindow: BrowserWindow) {
   }
 
-  getClientData(documents: boolean, profiles: boolean): IClientData {
+  getClientData(documents: boolean, profiles: boolean, message?: IClientReportData): IClientData {
     return {
       documents: documents ? this.database.documents : [],
-      profiles: profiles ? this.database.profiles : []
+      profiles: profiles ? this.database.profiles : [],
+      message,
     };
   }
 
   updateProfiles(profiles: IProfile[]) {
     this.database.updateProfiles(profiles);
+    return this.getClientData(false, true, {headline: 'Profile wurden erfolgreich aktualisiert', messages: []})
   }
 
-  async addDocument(autoMapFields: boolean): Promise<IClientData> {
-    const filename = showFilePickerSync(this.mainWindow, {defaultPath: '', title: 'Dokument verknüpfen'});
+  async addDocument(filename: string | undefined, autoMapFields: boolean, preview: boolean) {
     if (!filename) return this.getClientData(true, false);
     if (!fs.existsSync(filename))
       throw new Error('Die gewählte Datei konnte nicht gelesen werden. Bitte wenden Sie sich an Ihren persönlichen Ansprechpartner für IT-Probleme.');
@@ -111,8 +112,8 @@ export class NpAssistant {
     switch (type) {
       case "pdf":
         this.pdf.autoMapFields = autoMapFields;
-        document = await this.pdf.addDocument(filename);
-        startWithExpolorer((document as IPdfDocument).previewfile)
+          document = await this.pdf.addDocument(filename);
+        if (preview) startWithExpolorer((document as IPdfDocument).previewfile)
         break;
       case "xlsx":
         document = await this.xls.addDocument(filename);
@@ -122,45 +123,83 @@ export class NpAssistant {
         break;
     }
     this.database.addDocument(document);
-    return this.getClientData(true, false);
   }
 
-  async createDocuments(foldername: string, documentIds: string[], inputs: IMappedInput[]): Promise<string[]> {
+  async addDocuments(autoMapFields: boolean, wholeFolder: boolean): Promise<IClientData> {
+    let headline = 'Dokument wurde erfolgreich hinzugefügt';
+    if (wholeFolder) {
+      const folderName = showFolderPickerSync(this.mainWindow, {defaultPath: '', title: 'Ordner verknüpfen'});
+      const filenames = getFilesFromFolderSync(folderName);
+      for (let i = 0; i < filenames.length; i++) {
+        const filename = path.join(folderName, filenames[i]);
+        await this.addDocument(filename, autoMapFields, false);
+      }
+      headline = 'Ordner wurde erfolgreich hinzugefügt';
+    } else {
+      const filename = showFilePickerSync(this.mainWindow, {defaultPath: '', title: 'Dokument verknüpfen'});
+      await this.addDocument(filename, autoMapFields, true);
+    }
+    return this.getClientData(true, false, {headline, messages: []});
+  }
+
+  async createDocuments(foldername: string, documentIds: string[], inputs: IMappedInput[]): Promise<IClientData> {
     const outputFolder = path.join(outputPath, foldername);
     const {outputMsgs, valid} = createAndValidateFolder(outputFolder);
     if (!valid) throw new Error(outputMsgs.join('||'));
     const documents = this.database.documents.filter(doc => documentIds.includes(doc.id));
+
     for (const document of documents) {
-      let basename;
-      switch (document.type) {
-        case "pdf":
-          basename = await this.pdf.createDocument(document as IPdfDocument, outputFolder, inputs, outputMsgs)
-          break;
-        case "xlsx":
-          basename = await this.xls.createDocument(document as IXlsxDocument, outputFolder, inputs, outputMsgs)
-          break;
-        case "resource":
-          basename = await this.resource.createDocument(document, outputFolder, inputs, outputMsgs)
-          break;
+      try {
+        let basename;
+        switch (document.type) {
+          case "pdf":
+            basename = await this.pdf.createDocument(document as IPdfDocument, outputFolder, inputs, outputMsgs)
+            break;
+          case "xlsx":
+            basename = await this.xls.createDocument(document as IXlsxDocument, outputFolder, inputs, outputMsgs)
+            break;
+          case "resource":
+            basename = await this.resource.createDocument(document, outputFolder, inputs, outputMsgs)
+            break;
+        }
+        outputMsgs.push(`Dokument wurden erstellt: ${basename}`);
+      } catch (e) {
+        outputMsgs.push('Beim erstellen von: ' + document.name + ' ist ein Fehler aufgetreten.');
+        outputMsgs.push('Folgende Felder wurden erwartet: ' + document.mapped.map(item => item.mappedName).join(', '));
+
+        outputMsgs.push('Debug Info:' +  inputs.map(item => item.identifiers.join(', ')).join('; '));
       }
-      outputMsgs.push(`Dokument wurden erstellt: ${basename}`);
     }
 
     outputMsgs.push(`Alle Dokumente wurden erfolgreich erstellt.`);
-    return outputMsgs;
+    return this.getClientData(false, false, {
+      headline: 'Dokumente wurden erfolgreich erstellt',
+      messages: outputMsgs,
+      messageFolder: outputFolder
+    });
   }
 
-  removeDocument(id: string) {
-    this.database.removeDocument(id);
-    return this.getClientData(true, true);
+  removeDocument(id: string | number, removeEverything: boolean) {
+    let headline = 'Dokument wurde erfolgreich entfernt';
+    console.log(id, typeof id, id === -1, removeEverything);
+
+    if (typeof id === 'number') {
+      if (id === -1 && removeEverything) {
+        this.database.reset();
+        headline = 'System wurde erfolgreich zurückgesetzt';
+      }
+    } else {
+      this.database.removeDocument(id);
+    }
+    return this.getClientData(true, true, {headline, messages: []});
   }
 
   updateDocument(document: IMappedDocument) {
     this.database.updateDocument(document);
-    return this.getClientData(true, true);
+    return this.getClientData(true, true, {headline: 'Dokument wurde erfolgreich gespeichert', messages: []});
   }
 
-  remapDocument(id: string) {
+  async remapDocument(id: string) {
     if (!this.database.documentIdExists(id))
       throw new Error('Dieses Dokument existiert nicht mehr. Bitte wenden Sie sich an Ihren persönlichen Ansprechpartner für IT-Probleme.');
 
@@ -172,16 +211,23 @@ export class NpAssistant {
     if (!fs.existsSync(newfilename))
       throw new Error('Die gewählte Datei konnte nicht gelesen werden. Bitte wenden Sie sich an Ihren persönlichen Ansprechpartner für IT-Probleme.');
 
-    const {basename, type, mtimeMs} = getFileStats(newfilename);
+    const {basename, type} = getFileInfo(newfilename);
     if (type !== original.type) throw new Error('Es kann hier nur eine Änderung des Dateinamens vorgenommen werden. Eine Änderung des Vorlagen-Typs geht nur über löschen und neu anlegen.');
-    original.filename = newfilename;
-    original.name = basename;
-    original.mtime = mtimeMs;
-
-    throw new Error('Remapppppppp is not ready....')
-
-    this.database.updateDocument(original);
-    return this.getClientData(true, true);
+    const outputMsgs: string[] = [];
+    switch (original.type) {
+      case "pdf":
+        await this.pdf.remapDocument(original as IPdfDocument, newfilename)
+        break;
+      case "xlsx":
+        await this.xls.remapDocument(original as IXlsxDocument, newfilename)
+        break;
+      case "resource":
+        await this.resource.remapDocument(original, newfilename)
+        break;
+    }
+    outputMsgs.push(`Dokument wurde neu verknüpft mit: ${basename}`);
+    this.database.updateDocument(original, true);
+    return this.getClientData(true, true, {headline: 'Dokument wurde erfolgreich neu verknüpft', messages: outputMsgs});
   }
 
 }

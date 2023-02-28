@@ -9,7 +9,7 @@ import {
   IMappedInput,
   IPdfDocument,
   IProfile,
-  IXlsxDocument
+  IXlsxDocument, TTemplateType
 } from '../../../bridge/shared.model';
 import {APP_CONFIG} from '../../environments/environment';
 import {AppService} from '../services/app.service';
@@ -43,11 +43,13 @@ export class HomeComponent implements OnInit, OnDestroy {
   profiles: IProfile[] = [];
 
   options = {
-    autoMapFields: false
+    visible: false,
+    autoMapFields: true
   }
 
   private dialogSub: Subscription;
   private subs: Subscription[] = [];
+
   private changedName = false;
 
   constructor(
@@ -58,15 +60,15 @@ export class HomeComponent implements OnInit, OnDestroy {
   ) {
     this.subs.push(
       // on return messages from electron call
-      electronService.report$.subscribe((data: string[]) => {
+      electronService.report$.subscribe((data) => {
         console.log('43: report');
         this.ngZone.runTask(() => {
           this.dialog.open(MessageDialogComponent,
             {
               data: {
-                headline: 'Export war erfolgreich',
-                msgs: data,
-                folder: this.export.folder
+                headline: data.headline,
+                msgs: data.messages,
+                folder: data.messageFolder
               },
               autoFocus: 'dialog',
               hasBackdrop: true,
@@ -81,6 +83,9 @@ export class HomeComponent implements OnInit, OnDestroy {
           console.log('61: really finished load');
           this.updateDataSource(data.documents);
           this.profiles = data.profiles || [];
+          if (data.message) {
+            electronService.report$.emit(data.message)
+          }
         });
       }),
       electronService.update$.subscribe((data: IClientData) => {
@@ -117,7 +122,9 @@ export class HomeComponent implements OnInit, OnDestroy {
     );
   }
 
+
   private updateDataSource(newData: IMappedDocument[]) {
+
     newData.map(newDoc => {
       const mappedFields = newDoc.mapped?.map(field => ({
         ...field,
@@ -125,7 +132,16 @@ export class HomeComponent implements OnInit, OnDestroy {
       })) ?? []
       const origin = this.dataSource.find(doc => doc.id === newDoc.id);
       if (origin) {
+        // TODO: hmm not very nice
         origin.mapped = mappedFields;
+        origin.name = newDoc.name;
+        origin.filename = newDoc.filename;
+        origin.mtime = newDoc.mtime;
+        if ((origin as unknown as IPdfDocument).fields) {
+          (origin as unknown as IPdfDocument).fields = (newDoc as unknown as IPdfDocument).fields;
+          (origin as unknown as IPdfDocument).previewfile = (newDoc as unknown as IPdfDocument).previewfile;
+        }
+
       } else {
         this.dataSource.push(
           {
@@ -141,10 +157,10 @@ export class HomeComponent implements OnInit, OnDestroy {
     }
   }
 
-
   private findTemplateWithMappedOriginFieldId(origId: string) {
     return this.dataSource.find(document => (document.mapped || []).find((field: IMappedField) => field.origId === origId));
   }
+
 
   updateExport() {
     this.export.documents = this.dataSource.filter(doc => doc.export);
@@ -178,8 +194,8 @@ export class HomeComponent implements OnInit, OnDestroy {
     this.export.fields = newFields;
   }
 
-
   // use confirm dialog
+
   private removeDocument(template: TUIDocument) {
     if (this.dataSource) {
       this.dataSource.splice(this.dataSource.indexOf(template), 1);
@@ -189,6 +205,7 @@ export class HomeComponent implements OnInit, OnDestroy {
   }
 
   // use confirm dialog
+
   private removeField(field: TUIDocumentField) {
     if (this.dataSource) {
       const document =
@@ -225,6 +242,10 @@ export class HomeComponent implements OnInit, OnDestroy {
     this.electronService.addFileTemplate(this.options.autoMapFields);
   }
 
+  addFileTemplates() {
+    this.electronService.addFileTemplates(this.options.autoMapFields);
+  }
+
   remapDocument(doc: IMappedDocument, $event: MouseEvent) {
     $event.stopPropagation(); // do not toggle accordion
     this.electronService.remapFileTemplate(doc);
@@ -240,7 +261,8 @@ export class HomeComponent implements OnInit, OnDestroy {
     this.electronService.openOutputFolder('');
   }
 
-  changedExportOnDocument() {
+  changedExportOnDocument(doc: Omit<IMappedDocument<TTemplateType>, "mapped"> & { export: boolean; mapped: TUIDocumentField[] }) {
+    doc.mapped.forEach(field => field.export = doc.export);
     this.updateExport();
   }
 
@@ -253,7 +275,7 @@ export class HomeComponent implements OnInit, OnDestroy {
     const profileObj = profile ? this.profiles.find(prof => prof.id === profile) : null;
     const type = !!document ? 'Dokument' : !!field ? 'Feld' : 'Export Profil';
     const name = !!document ? document.name : !!field ? field.mappedName : profileObj?.name ?? 'Error';
-    const dialogRef = this.dialog.open(ConfirmDialogComponent, {data: {type, itemName: name}});
+    const dialogRef = this.dialog.open(ConfirmDialogComponent, {data: `${type} ${name} wirklich entfernen?`});
     if (this.dialogSub && !this.dialogSub.closed) {
       this.dialogSub.unsubscribe();
     }
@@ -392,6 +414,21 @@ export class HomeComponent implements OnInit, OnDestroy {
     if (data.length) {
       this.profiles = data;
       this.changedProfile();
+    }
+  }
+
+  showCustomConfirm(message: string) {
+    const dialogRef = this.dialog.open(ConfirmDialogComponent, {data: message});
+    return dialogRef.afterClosed().toPromise();
+  }
+
+  async resetApp() {
+    const doReset = await this.showCustomConfirm('Dies löscht alle Daten aus dem Programm. Sind Sie sich wirklich sicher?');
+    if (doReset) {
+      this.electronService.resetApp()
+      this.dataSource = [];
+      this.profiles = [];
+      this.profileId = '';
     }
   }
 }
