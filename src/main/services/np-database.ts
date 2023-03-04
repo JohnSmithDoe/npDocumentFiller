@@ -42,7 +42,6 @@ export class NpDatabase {
   private readDocumentDatabase() {
     if (fs.existsSync(this.config.DB_FILE)) {
       const content = fs.readFileSync(this.config.DB_FILE, {encoding: 'utf8'});
-      console.warn(content, JSON.parse(content));
       this._database = JSON.parse(content);
     } else {
       console.warn('new database');
@@ -155,7 +154,7 @@ export class NpDatabase {
   private updateProfilesOnDocumentChange(document: IMappedDocument) {
     this.profiles.forEach(profile => {
       if(profile.documentIds.includes(document.id)) {
-        profile.fieldIds = profile.fieldIds.filter(origId => this.mappedFieldExists(origId, document));
+        profile.fieldIds = profile.fieldIds.filter(origId => this.mappedFieldExists(origId));
       }
     })
     this.writeProfilesDatabase();
@@ -170,12 +169,8 @@ export class NpDatabase {
     })
     this.writeProfilesDatabase();
   }
-  private mappedFieldExists(origId: string, document?: IMappedDocument) {
-    if(document) {
-      return !!document.mapped.find(mappedField => mappedField.origId === origId);
-    } else {
+  private mappedFieldExists(origId: string) {
       return !!this.documents.find(document => !!document.mapped.find(mappedField => mappedField.origId === origId));
-    }
   }
 
 }

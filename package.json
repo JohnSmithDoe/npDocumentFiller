@@ -1,6 +1,6 @@
 {
   "name": "np-fill-in-helper",
-  "version": "1.1.8",
+  "version": "1.1.9",
   "description": "Copy and fill xlsx and pdf documents with the same input data",
   "main": "dist/main/main.js",
   "scripts": {

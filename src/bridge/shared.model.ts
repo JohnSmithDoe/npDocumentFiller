@@ -1,4 +1,4 @@
-export const APP_VERSION = 'v1.1.8';
+export const APP_VERSION = 'v1.1.9';
 export interface IAppConfig {
   PDFTK_EXE?: string;
   ENCODING?: string;
