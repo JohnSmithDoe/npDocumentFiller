@@ -105,7 +105,7 @@ export class PdfService extends NPService {
       const value = inputs.find(input => input.identifiers.includes(mappedField.origId))?.value;
       if (value && fdfField) {
         fdfField.value = value;
-      }else{
+      } else {
         outputMsgs.push('ACHTUNG: Das Feld ' + origField.path + ' konnte nicht gefunden werden.');
         outputMsgs.push('Bitte prüfen Sie das Dokument: ' + document.name + ' auf Änderungen.');
         outputMsgs.push('Entfernen Sie das Dokument gegebenenfalls aus der Software und fügen Sie es erneut hinzu.');
@@ -126,11 +126,16 @@ export class PdfService extends NPService {
     await super.remapDocument(original, newfilename);
     const newDocument = await this.addDocument(newfilename);
     const newFields = newDocument.fields.filter(newField => !original.fields.find(originalField => originalField.path === newField.path));
+    // console.log('newFields', newFields);
     const removedFields = original.fields.filter(originalField => !newDocument.fields.find(newField => originalField.path === newField.path));
+    // console.log('removedFields', removedFields);
     for (const removedField of removedFields) {
       original.fields.splice(original.fields.indexOf(removedField), 1);
     }
+    // console.log('o1', original.fields, original.mapped);
     original.fields.push(...newFields);
+    // console.log('o2', original.fields, original.mapped);
     original.mapped = original.mapped.filter(mappedField => original.fields.find(originalField => originalField.id === mappedField.origId));
+    // console.log('o3', original.fields, original.mapped);
   }
 }

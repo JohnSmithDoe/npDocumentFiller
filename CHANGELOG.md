@@ -1,3 +1,7 @@
+### Version 1.1.8
+* Bugfix - Re-Adding Documents
+  * Mapped Field Identifiers got mixed up
+
 ### Version 1.1.7
 * To make redistribution and redeploy easier we added
   * Feature - Import folder (Import a whole folder full of documents)

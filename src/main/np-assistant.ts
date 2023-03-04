@@ -101,7 +101,6 @@ export class NpAssistant {
   }
 
   async addDocument(filename: string | undefined, autoMapFields: boolean, preview: boolean) {
-    if (!filename) return this.getClientData(true, false);
     if (!fs.existsSync(filename))
       throw new Error('Die gewählte Datei konnte nicht gelesen werden. Bitte wenden Sie sich an Ihren persönlichen Ansprechpartner für IT-Probleme.');
     if (this.database.documentExists(filename))
@@ -112,7 +111,7 @@ export class NpAssistant {
     switch (type) {
       case "pdf":
         this.pdf.autoMapFields = autoMapFields;
-          document = await this.pdf.addDocument(filename);
+        document = await this.pdf.addDocument(filename);
         if (preview) startWithExpolorer((document as IPdfDocument).previewfile)
         break;
       case "xlsx":
@@ -126,20 +125,25 @@ export class NpAssistant {
   }
 
   async addDocuments(autoMapFields: boolean, wholeFolder: boolean): Promise<IClientData> {
-    let headline = 'Dokument wurde erfolgreich hinzugefügt';
+    let headline;
     if (wholeFolder) {
       const folderName = showFolderPickerSync(this.mainWindow, {defaultPath: '', title: 'Ordner verknüpfen'});
-      const filenames = getFilesFromFolderSync(folderName);
-      for (let i = 0; i < filenames.length; i++) {
-        const filename = path.join(folderName, filenames[i]);
-        await this.addDocument(filename, autoMapFields, false);
+      if (folderName) {
+        const filenames = getFilesFromFolderSync(folderName);
+        for (let i = 0; i < filenames.length; i++) {
+          const filename = path.join(folderName, filenames[i]);
+          await this.addDocument(filename, autoMapFields, false);
+        }
+        headline = 'Ordner wurde erfolgreich hinzugefügt';
       }
-      headline = 'Ordner wurde erfolgreich hinzugefügt';
     } else {
       const filename = showFilePickerSync(this.mainWindow, {defaultPath: '', title: 'Dokument verknüpfen'});
-      await this.addDocument(filename, autoMapFields, true);
+      if(filename){
+        await this.addDocument(filename, autoMapFields, true);
+        headline = 'Dokument wurde erfolgreich hinzugefügt';
+      }
     }
-    return this.getClientData(true, false, {headline, messages: []});
+    return this.getClientData(true, false, headline ? {headline, messages: []} : undefined);
   }
 
   async createDocuments(foldername: string, documentIds: string[], inputs: IMappedInput[]): Promise<IClientData> {
@@ -167,7 +171,7 @@ export class NpAssistant {
         outputMsgs.push('Beim erstellen von: ' + document.name + ' ist ein Fehler aufgetreten.');
         outputMsgs.push('Folgende Felder wurden erwartet: ' + document.mapped.map(item => item.mappedName).join(', '));
 
-        outputMsgs.push('Debug Info:' +  inputs.map(item => item.identifiers.join(', ')).join('; '));
+        outputMsgs.push('Debug Info:' + inputs.map(item => item.identifiers.join(', ')).join('; '));
       }
     }
 
@@ -181,8 +185,6 @@ export class NpAssistant {
 
   removeDocument(id: string | number, removeEverything: boolean) {
     let headline = 'Dokument wurde erfolgreich entfernt';
-    console.log(id, typeof id, id === -1, removeEverything);
-
     if (typeof id === 'number') {
       if (id === -1 && removeEverything) {
         this.database.reset();

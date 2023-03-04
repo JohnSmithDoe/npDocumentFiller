@@ -132,11 +132,11 @@ export class HomeComponent implements OnInit, OnDestroy {
       })) ?? []
       const origin = this.dataSource.find(doc => doc.id === newDoc.id);
       if (origin) {
-        // TODO: hmm not very nice
         origin.mapped = mappedFields;
         origin.name = newDoc.name;
         origin.filename = newDoc.filename;
         origin.mtime = newDoc.mtime;
+        // TODO: hmm not very nice
         if ((origin as unknown as IPdfDocument).fields) {
           (origin as unknown as IPdfDocument).fields = (newDoc as unknown as IPdfDocument).fields;
           (origin as unknown as IPdfDocument).previewfile = (newDoc as unknown as IPdfDocument).previewfile;
@@ -164,10 +164,7 @@ export class HomeComponent implements OnInit, OnDestroy {
 
   updateExport() {
     this.export.documents = this.dataSource.filter(doc => doc.export);
-    this.export.folder = (new Date())
-      .toLocaleString('de')
-      .slice(0, 16).replace(/[.\s:]/g, '')
-      .replace(/,/g, 'T') + (!!this.export.suffix ? '-' + this.export.suffix : '');
+    this.export.folder = (Date.now().toString()) + (!!this.export.suffix ? '-' + this.export.suffix : '');
     this.export.msgs = this.export.documents.map(document => `<b>Dokument:</b> ${document.name}`)
     if (this.export.msgs.length) {
       this.export.msgs.unshift(`<b>Ordner:</b> ${this.export.folder}`);
@@ -180,10 +177,15 @@ export class HomeComponent implements OnInit, OnDestroy {
       map[current.mappedName].push(current);
       return map;
     }, {});
+
     const newFields: TUIExportInput[] = [];
     for (const mappedName in byName) {
       const fields = byName[mappedName];
-      const docs = this.export.documents.filter(doc => doc.mapped.find(field => (field.mappedName === mappedName) && field.export));
+      const docs = this.export.documents.filter(doc => doc.mapped.reduce(
+        (found, current) => {
+        return found || fields.includes(current);
+      }, false));
+
       newFields.push({
         mappedName: mappedName,
         value: this.export.fields.find(field => field.mappedName === mappedName)?.value ?? '',

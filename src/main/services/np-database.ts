@@ -172,9 +172,9 @@ export class NpDatabase {
   }
   private mappedFieldExists(origId: string, document?: IMappedDocument) {
     if(document) {
-      return !!document.mapped.find(mappedField => mappedField.origId = origId);
+      return !!document.mapped.find(mappedField => mappedField.origId === origId);
     } else {
-      return !!this.documents.find(document => !!document.mapped.find(mappedField => mappedField.origId = origId));
+      return !!this.documents.find(document => !!document.mapped.find(mappedField => mappedField.origId === origId));
     }
   }
 
